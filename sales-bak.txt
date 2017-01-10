@@ -1,0 +1,519 @@
+<?php
+ob_start();
+session_start();
+$accountID=@$_SESSION['accountID'];
+$orderID=@$_SESSION['orderID'];
+
+$page=@$_GET['page'];
+
+$keyword=@$_GET['keyword'];
+$search=@$_GET['search'];
+			$by=@$_GET['by'];
+			$order=@$_GET['order'];
+
+#$connect = mysql_connect("localhost","qfcdavao_admin","_39a11nwpm");
+#mysql_select_db("qfcdavao_dbinventory");
+
+include 'db.php';
+
+$cart_query = mysql_query("SELECT * FROM tbl_cart WHERE accountID='$accountID'");
+if(mysql_num_rows($cart_query)==0){
+	$typeprice=@$_GET['type'];
+}else{
+	while($cart_row=mysql_fetch_assoc($cart_query)){
+		$typeprice=$cart_row["type_price"];
+	}
+	
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><?php echo $app_name; ?> - Sales</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php
+  if(isset($themes)&&$themes!=''){
+	  echo "<link rel='stylesheet' href='css/$themes'>";
+  }else{
+	  echo "<link rel='stylesheet' href='css/bootstrap.min.css'>";
+  }
+  
+  ?>
+  <link rel="stylesheet" href="style.css">
+  <script src="jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+  <style>
+  .item:hover{
+	  cursor:pointer;
+  }
+
+  </style>
+  <link rel="stylesheet" href="css/theme.default.min.css">
+  <script type="text/javascript" src="js/jquery.tablesorter.js"></script>
+  
+  <link rel="stylesheet" href="themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="jquery-ui.js"></script>  
+  <script>
+  $(document).ready(function(){
+	  $("#myTable").tablesorter();
+	  $("#myTable").tablesorter( {sortList: [[1,0], [0,0]]} );
+	  
+	  $("#reset").click(function(){
+		  var dataString = 'reset=1';
+		  $.ajax({
+			type: 'POST',
+			url: 'sales-cart-add.php',
+			data: dataString,
+			cache: false,
+			success: function(html){
+				window.location = 'sales.php';
+			}
+		  });
+	  });
+	  
+	  $(".quantity").change(function(e){
+			var dataString = 'id='+ e.target.id + '&value='+e.target.value;
+			$.ajax({
+				type: 'POST',
+				url: 'sales-cart-add.php',
+				data: dataString,
+				cache: false,
+				success: function(html){
+					window.location = 'sales.php';
+				}
+			});
+	  });
+	  
+	  $(".price").change(function(e){
+			var dataString = 'id='+ e.target.id + '&price='+e.target.value;
+			$.ajax({
+				type: 'POST',
+				url: 'sales-cart-add.php',
+				data: dataString,
+				cache: false,
+				success: function(html){
+					window.location = 'sales.php';
+				}
+			});
+	  });
+	  
+	  $("#type").change(function(){
+		  var n = $(this).val();
+		  window.location="sales-type.php?type="+n;
+	  });
+	  $(".delete").click(function(){
+		  if(conf = confirm("Are you sure you want to delete selected item?")){
+		  var id = $(this).attr("href");
+		  window.location=id;
+		  }		  
+	  });
+	  $("#type_payment_cart").change(function(){
+		var type_payment = $(this).val();
+		var dataString = 'search='+ type_payment;
+		  $.ajax({
+				type: 'POST',
+				url: 'sales-cart-add.php',
+				data: dataString,
+				cache: false,
+				success: function(html){
+					
+				}
+		  });
+	  });
+	  
+
+		
+	$( "#searchid" ).autocomplete({
+      source: 'search-customer-auto.php',
+	  select: function(event, ui){
+		  window.location='sales-add-customer.php?id='+ui.item.data;
+	  }
+    });
+		
+		
+	$( "#itemsearch" ).autocomplete({
+      source: 'search-item-auto.php',
+	  select: function(event, ui){
+		  window.location='sales-add.php?id='+ui.item.data;
+	  }
+    });
+	
+	
+	
+	$( "#search" ).autocomplete({
+      source: 'search-item-all.php',
+	  select: function(event, ui){
+		  window.location='item.php?s='+ui.item.data;
+	  }
+    });
+	
+
+	$("#delall").click(function(){
+		var dataString = 'delall=1';
+		  $.ajax({
+				type: 'POST',
+				url: 'sales-cart-add.php',
+				data: dataString,
+				cache: false,
+				success: function(html){
+					window.location='sales.php';
+				}
+		  });
+	});
+		
+		
+	  
+  });
+  </script>
+    <style>
+	.page{
+		display:none;
+	}
+	
+@media print{
+	.page{
+		display:inline !important;
+	}
+  .prints{
+	  display:none;
+	  }
+	  .content{
+		  border-color:white;
+	  }
+	  
+    a[href]:after {
+    content: none !important;
+  }
+}
+	#result,#itemresult, #item_results
+	{
+		width:100%;
+		max-height:200px;
+		padding:10px;
+		display:none;
+		margin-top:-1px;
+		border-top:0px;
+		overflow:auto;
+		border:1px #CCC solid;
+		background-color: white;
+	}
+	#item_results{
+		position:absolute;
+		width:250px;
+		z-index:3;
+	}
+	.show,.cusclose
+	{
+		padding:10px; 
+		border-bottom:1px #999 dashed;
+		font-size:15px; 
+	}
+	.cusclose:hover,.show:hover
+	{
+		background:#4c66a4;
+		color:#FFF;
+		cursor:pointer;
+	}
+	
+  </style>
+</head>
+<body>
+	   <nav class = "navbar navbar-default" role = "navigation" id='heading'>
+	   <div class = "navbar-header">
+		  <button type = "button" class = "navbar-toggle" 
+			 data-toggle = "collapse" data-target = "#example-navbar-collapse">
+			 <span class = "sr-only">Toggle navigation</span>
+			 <span class = "icon-bar"></span>
+			 <span class = "icon-bar"></span>
+			 <span class = "icon-bar"></span>
+		  </button>
+		  <a class = "navbar-brand" href = "index.php"><?php echo $app_name; ?></a>
+	   </div>
+	   
+	   <div class = "collapse navbar-collapse" id = "example-navbar-collapse">
+		  <ul class = "nav navbar-nav  navbar-left">
+			 <li><a href="index.php"><span class = "glyphicon glyphicon-home"></span> Home</a></li>
+			 <?php if($items=='1'){ ?>
+			 <li><a href="item.php"><span class = "glyphicon glyphicon-briefcase"></span> Items</a></li>
+			 <?php } ?>
+			 <?php if($customers=='1'){ ?>
+			 <li><a href="customer.php"><span class = "glyphicon glyphicon-user"></span> Customers</a></li>				 
+			 <?php } ?>
+			 <?php if($sales=='1'){ ?>
+			 <li class='active'><a href="sales.php"><span class = "glyphicon glyphicon-shopping-cart"></span> Sales <span class = "badge"><?php echo $badge; ?></span></a></li>		  
+			 <?php } ?>
+			 <?php if($suppliers=='1'){ ?>
+			 <li><a href="suppliers.php"><span class="glyphicon glyphicon-phone"></span> Suppliers</a></li>		  
+			 <?php } ?>
+			 <?php if($receiving=='1'){ ?>
+			 <li><a href="receiving.php"><span class = "glyphicon glyphicon-download-alt"></span> Receiving <span class = "badge"><?php echo $badge_r; ?></span></a></li>		  
+			 <?php } ?>
+			 <?php if($users=='1'){ ?>
+			 <li><a href="users.php"><span class = "glyphicon glyphicon-user"></span> Users</a></li>		  
+			 <?php } ?>
+			 <?php if($reports=='1'){ ?>
+			 <li><a href="reports.php"><span class = "glyphicon glyphicon-stats"></span> Reports</a></li>		  
+			 <?php } ?>	 
+			 <?php if($logged!=0){ ?>
+			 <div class="form-group navbar-form navbar-right">
+				<input type="text" class="form-control" placeholder="Search" name='search' id='search' autocomplete='off'><div id='item_results'></div>
+			 </div>
+			 <?php } ?>
+		  </ul>
+
+		  
+		  
+		  <?php 
+		  if($logged==0){ ?>
+		  	<ul class='nav navbar-nav navbar-right'>
+				<li><a href='login.php'><span class='glyphicon glyphicon-log-in'></span> Login</a></li>
+			</ul>
+		  <?php }else{ ?>
+		  	<ul class='nav navbar-nav navbar-right'>
+				
+				
+				<li>
+					<a href='#' role='button' 
+					  data-container = 'body' data-toggle = 'popover' data-placement = 'bottom' 
+					  data-content = "
+						<?php if($type=='admin'){?><a href='expenses.php' class = 'list-group-item'><span class='glyphicon glyphicon-usd'></span> Expenses</a><?php } ?><a href='settings.php' class = 'list-group-item'><span class='glyphicon glyphicon-cog'></span> Settings</a>
+						<a href = 'logout.php' class = 'list-group-item'><span class='glyphicon glyphicon-log-out'></span> Logout</a>
+										  					  
+					  ">
+					Hi <?php echo $employee_name; ?></a></a>
+				</li>				
+				
+			</ul>
+		  <?php }?>
+
+		  
+		  
+		  </div>
+
+	   </nav>	
+<div class="container">
+  <div class='row'>
+  	<div class='col-md-12'>
+	<?php
+	if($logged==1||$logged==2){
+		if($sales=='1'){
+	?>
+	
+	<div class='col-md-2'>
+	
+	<span><b>Add Item:</b></span>
+	
+            <div class = "form-group">
+               <input type = "text" class = "form-control itemsearch" name='itemname' id='itemsearch' autocomplete='off' placeholder='Type for Item Name'>
+            </div><!-- /input-group -->			
+		
+	<div id='itemresult'>
+	</div>
+	<form action='sales-form.php' method='post'>
+	
+	<?php
+
+	
+	
+	// if empty cart
+	$inthecartquery = mysql_query("SELECT * FROM tbl_cart WHERE accountID='$accountID'");
+	if(mysql_num_rows($inthecartquery)!=0){
+	?>
+	<span><b>Type of Price:</b></span>
+	<select id='type' class='form-control'>
+		<option value='srp' 
+		<?php if(isset($typeprice)&&strtolower($typeprice)=="srp"){
+		echo "selected='selected'";	
+		}
+		?> >Suggested Retail Price</option>
+		<option value='dp'
+		<?php if(isset($typeprice)&&strtolower($typeprice)=="dp"){
+		echo "selected='selected'";	
+		}
+		?>
+		>Dealer Price</option>
+	</select>
+	<a class='btn btn-info btn-block' id='reset'><span class='glyphicon glyphicon-refresh'></span> Reset All Prices</a>
+	<br>
+	
+	<span><b>Customer:</b></span>
+	<?php
+	$customername = mysql_query("SELECT DISTINCT customer,type_payment,comments FROM tbl_cart WHERE accountID='$accountID' ORDER BY customer DESC");
+	if(mysql_num_rows($customername)!=0){
+		while($cusrow=mysql_fetch_assoc($customername)){
+			$customer = $cusrow["customer"];
+			$comments = $cusrow["comments"];
+			$type_payment_db = $cusrow["type_payment"];
+		}
+		echo "<input type='text' class='form-control search' id='searchid' name='customer' placeholder='Customer Name' value='$customer' autocomplete='off'>";
+	}else{
+		echo "<input type='text' class='form-control search' id='searchid' name='customer' placeholder='Customer Name' autocomplete='off'>";
+	}
+	?>
+	<div id='result'>
+	</div>
+	<br>
+	<span><b>Type of Payment:</b></span>
+	<select name='type_payment' class='form-control' id='type_payment_cart'>
+	<?php
+	$type_payment_explode=explode(",",$type_payment);
+	foreach($type_payment_explode as $type_payment){
+		echo "
+		<option value='$type_payment' ";
+		if($type_payment_db==$type_payment){
+			echo "selected='selected'";
+		}
+		echo ">$type_payment</option>
+		";
+	}
+	
+	?>
+	</select>
+	
+	<br>
+	<span><b>Comments:</b></span>
+	<textarea name='comments' class='form-control'><?php echo $comments; ?></textarea>
+	
+	<br>
+	<span><b>Sales Register:</b></span>
+	<button class='btn btn-primary btn-block' name='save'><span class='glyphicon glyphicon-floppy-disk'></span> Save</button>
+	<button class='btn btn-primary btn-block' name='savecontinue'><span class='glyphicon glyphicon-floppy-disk'></span> Save & Continue</button>
+	<a class='btn btn-danger btn-block' name='delete' id='delall'><span class='glyphicon glyphicon-trash'></span> Cancel Sale</a>
+	
+	<?php }
+
+
+	if($orderID!=Null){
+		echo "<a href='sales-complete.php'>View Last Transaction</a>";
+	}
+	?>
+	
+
+	
+	
+	</div>
+	<div class='table-responsive col-md-10'>
+
+	<table class='table table-hover tablesorter tablesorter-default' id='myTable'>
+	<thead>
+		<tr>
+			<th>Item Name</th>
+			<th>Remaining</th>
+			<th>Quantity</th>
+			<?php
+			if(isset($typeprice)&&strtolower($typeprice)=='dp'){
+				echo "<th>Dealer Price</th>";
+				echo "<input type='hidden' name='type' value='$typeprice'>";
+				
+			}else{
+				echo "<th>Suggested Retail Price</th>";
+				echo "<input type='hidden' name='type' value='srp'>";
+			}
+			?>
+			
+			<th style='text-align:right'>Line Total</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	<?php
+	$total = 0;
+		$cartquery = mysql_query("SELECT * FROM tbl_cart WHERE accountID='$accountID'");
+		if(mysql_num_rows($cartquery)!=0){
+			while($itemrow=mysql_fetch_assoc($cartquery)){
+				$itemID = $itemrow["itemID"];
+				$quantity = $itemrow["quantity"];
+				$cartprice = $itemrow["price"];
+				$customerID = $itemrow["customerID"];
+				$pricequery = mysql_query("SELECT * FROM tbl_items WHERE itemID='$itemID'");
+				while($pricerow=mysql_fetch_assoc($pricequery)){
+					$itemname = $pricerow["itemname"];
+					$remaining = $pricerow["quantity"];
+					$category = $pricerow["category"];
+					if($cartprice=="0"){
+						if(isset($typeprice)&&strtolower($typeprice)=='dp'){
+							$price = $pricerow['dp'];
+							
+						}else{
+							$price = $pricerow['srp'];
+						}
+					}else{
+						$price=$cartprice;
+					}
+				}
+				$subtotal = $quantity*$price;
+				$total = $total + $subtotal;
+				echo "
+				<tr>
+					<input type='hidden' name='itemID[]' value='$itemID'>
+					<td><a href='item.php?s=$itemID'>$itemname</a><br><i style='font-size:75%;'>$category</i></td>
+					<td>$remaining</td>
+					<td><input type='number' min='1' max='$remaining' value='$quantity' name='quantity[]' required='required' class='quantity' id='$itemID'></td>
+					<td>₱<input type='number' min='0' max='999999999' step='0.01' value='$price' name='price[]' required='required' class='price' id='$itemID'></td>
+					<td style='text-align:right'><b>₱".number_format($subtotal,2)."</b></td>
+					<td>
+					<span class='delete btn btn-danger' href='sales-form.php?id=$itemID'>X</span>
+					</td>
+					
+				</tr>
+				";
+			}
+		}else{
+			echo "
+			<tr>
+				<td colspan='20' align='center'><b style='font-size:200%'>No Items to Show.</b></td>
+			</tr>
+			";
+		}
+
+	?>
+	</tbody>
+	<tfoot>
+	<?php
+	if(mysql_num_rows($cartquery)!=0){
+		echo "
+	<tr>
+		<input type='hidden' name='total' value='$total'>
+		<td colspan='4' align='right'><b>Total:</b></td>
+		<td style='text-align:right'><b>₱".number_format($total,2)."</b></td>
+	</tr>
+	";
+	}
+	?>
+	</tfoot>
+	</table>
+	</div>
+	</form>
+
+
+
+	
+	<?php
+	}else{
+		echo "<strong><center>You do not have the authority to access this module.</center></strong>";
+	}
+	}else{
+	?>
+	Login
+	<form action='login.php' role='form' method='post'>
+	<input type='text' name='username' placeholder='Username' class='form-control'>
+	<input type='Password' name='password' placeholder='Password' class='form-control'>
+	<button class='btn btn-primary' name='login' type='submit'>Login
+	</button>
+	</form>
+
+	<?php 
+	} ?>
+	</div>
+  </div>
+</div>
+</body>
+</html>
+<?php mysql_close($connect);?>
+  <script>
+$("[data-toggle=popover]")
+.popover({html:true})
+</script>
