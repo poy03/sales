@@ -12,12 +12,21 @@ $type='';
 error_reporting(0);
 $list_modules = array();
 define("APP_VERSION","1.0");
-define("DB_NAME","pos_main");
+define("DB_NAME","jbtech_pos");
 define("DB_USER","root");
 define("DB_PASSWORD","");
 
 $connect = mysql_connect("localhost",DB_USER,DB_PASSWORD);
-mysql_select_db(DB_NAME);
+$db_selected = mysql_select_db(DB_NAME);
+if(!$db_selected){
+	create_db();
+}
+
+$db_tables_query = mysql_query("SHOW TABLES FROM ".DB_NAME);
+
+if(!mysql_fetch_array($db_tables_query)){
+  create_tables();
+}
 
 $app_db = mysql_query("SELECT * FROM app_config");
 if(mysql_num_rows($app_db)==0){
@@ -53,7 +62,6 @@ if(mysql_num_rows($app_db)==0){
 			$timezone  = 0;
 			$date_now =gmdate("m/d/Y", time() + 3600*($timezone+date("I")));
 
-			// echo $date_now;
 			$badge_credit_query = mysql_query("SELECT * FROM tbl_payments WHERE type_payment = 'CREDIT' AND date_due <= '".strtotime($date_now)."' AND deleted='0'");
 			$badge_credit = mysql_num_rows($badge_credit_query);
 			if($badge_credit==0){
@@ -142,7 +150,316 @@ if(!file_exists("auto_backup/".$filename_of_db)){
 }
 
 
+function create_db(){
+  mysql_query("CREATE DATABASE ".DB_NAME." DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
+  header("location:index");
+  exit;
+}
 
+function create_tables(){
+  mysql_query("CREATE TABLE app_config (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  app_name varchar(50) NOT NULL,
+  type_payment varchar(100) NOT NULL,
+  address varchar(100) NOT NULL,
+  contact_number varchar(100) NOT NULL,
+  app_company_name varchar(100) NOT NULL,
+  maximum_items_displayed float NOT NULL,
+  logo text NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+");
+
+  mysql_query("CREATE TABLE log_items (
+  log_id int(11) NOT NULL AUTO_INCREMENT,
+  itemID int(11) NOT NULL,
+  item_detail_id int(11) NOT NULL,
+  descripion text COLLATE utf8_unicode_ci NOT NULL,
+  date int(11) NOT NULL,
+  date_time int(11) NOT NULL,
+  accountID int(11) NOT NULL,
+  type varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (log_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+
+
+
+mysql_query("CREATE TABLE `tbl_cart` (
+  `cartID` int(255) NOT NULL AUTO_INCREMENT,
+  `itemID` int(255) NOT NULL,
+  `quantity` double NOT NULL,
+  `price` double NOT NULL,
+  `accountID` int(11) NOT NULL,
+  `Customer` varchar(100) NOT NULL,
+  `type_payment` varchar(100) NOT NULL,
+  `customerID` int(255) NOT NULL,
+  `comments` text NOT NULL,
+  `type_price` varchar(10) NOT NULL,
+  `terms` float NOT NULL,
+  `item_detail_id` int(11) NOT NULL,
+  PRIMARY KEY (`cartID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+");
+
+mysql_query("CREATE TABLE `tbl_cart_expenses` (
+  `cartID` int(255) NOT NULL AUTO_INCREMENT,
+  `description` varchar(150) NOT NULL,
+  `expenses` double NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `comments` text NOT NULL,
+  `serial_number` text NOT NULL,
+  PRIMARY KEY (`cartID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_cart_receiving` (
+  `cartID` int(255) NOT NULL AUTO_INCREMENT,
+  `itemID` int(255) NOT NULL,
+  `quantity` float NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `supplierID` int(255) NOT NULL,
+  `mode` varchar(50) NOT NULL,
+  `costprice` double NOT NULL,
+  `subtotal` double NOT NULL,
+  `comments` text NOT NULL,
+  `serial_number` text NOT NULL,
+  `purchase_order` text NOT NULL,
+  PRIMARY KEY (`cartID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_credits` (
+  `creditID` int(255) NOT NULL AUTO_INCREMENT,
+  `accountID` int(255) NOT NULL,
+  `customerID` int(255) NOT NULL,
+  `amount` double NOT NULL,
+  `date` varchar(50) NOT NULL,
+  `payment` double NOT NULL,
+  `paymentID` varchar(255) NOT NULL,
+  `type_payment` varchar(150) NOT NULL,
+  `comments` text NOT NULL,
+  PRIMARY KEY (`creditID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+");
+
+
+mysql_query("CREATE TABLE `tbl_customer` (
+  `customerID` int(255) NOT NULL AUTO_INCREMENT,
+  `companyname` varchar(50) NOT NULL,
+  `address` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `phone` varchar(50) NOT NULL,
+  `contactperson` varchar(50) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `x2` varchar(11) NOT NULL,
+  `x3` varchar(11) NOT NULL,
+  PRIMARY KEY (`customerID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+");
+
+
+mysql_query("CREATE TABLE `tbl_expenses` (
+  `exID` int(255) NOT NULL AUTO_INCREMENT,
+  `description` varchar(150) NOT NULL,
+  `expenses` float NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `orderID` int(255) NOT NULL,
+  `x1` int(11) NOT NULL,
+  `x2` int(11) NOT NULL,
+  PRIMARY KEY (`exID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+
+
+mysql_query("CREATE TABLE `tbl_items` (
+  `itemID` int(255) NOT NULL AUTO_INCREMENT,
+  `itemname` varchar(100) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `costprice` float NOT NULL,
+  `srp` double NOT NULL,
+  `dp` float NOT NULL,
+  `quantity` float NOT NULL,
+  `comment` text NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `reorder` int(11) NOT NULL,
+  `has_serial` int(11) NOT NULL,
+  PRIMARY KEY (`itemID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+
+mysql_query("CREATE TABLE `tbl_items_detail` (
+  `item_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `itemID` int(11) NOT NULL,
+  `serial_number` text COLLATE utf8_unicode_ci NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `has_serial` int(11) NOT NULL,
+  PRIMARY KEY (`item_detail_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+");
+
+mysql_query("CREATE TABLE `tbl_items_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `item_detail_id` int(11) NOT NULL,
+  `itemID` int(11) NOT NULL,
+  `serial_number` text COLLATE utf8_unicode_ci NOT NULL,
+  `description` text COLLATE utf8_unicode_ci NOT NULL,
+  `date_time` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `referenceID` int(11) NOT NULL,
+  `reference_number` text COLLATE utf8_unicode_ci NOT NULL,
+  `accountID` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+
+mysql_query("CREATE TABLE `tbl_orders` (
+  `orderID` int(255) NOT NULL AUTO_INCREMENT,
+  `date_ordered` int(11) NOT NULL,
+  `time_ordered` varchar(50) NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `total` double NOT NULL,
+  `type_payment` varchar(20) NOT NULL,
+  `customer` varchar(100) NOT NULL,
+  `payment` double NOT NULL,
+  `profits` double NOT NULL,
+  `loss` double NOT NULL,
+  `balance` double NOT NULL,
+  `costprice` double NOT NULL,
+  `comments` text NOT NULL,
+  `deleted` int(10) NOT NULL,
+  `date_due` varchar(20) NOT NULL,
+  `customerID` int(255) NOT NULL,
+  PRIMARY KEY (`orderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_orders_expenses` (
+  `orderID` int(255) NOT NULL AUTO_INCREMENT,
+  `date_of_expense` int(11) NOT NULL,
+  `time_expended` varchar(20) NOT NULL,
+  `description` text NOT NULL,
+  `expenses` double NOT NULL,
+  `comments` text NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  PRIMARY KEY (`orderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_orders_receiving` (
+  `orderID` int(255) NOT NULL AUTO_INCREMENT,
+  `total_cost` float NOT NULL,
+  `date_received` int(11) NOT NULL,
+  `time_received` varchar(20) NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `comments` text NOT NULL,
+  `supplierID` int(255) NOT NULL,
+  `mode` varchar(20) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  PRIMARY KEY (`orderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_payments` (
+  `paymentID` int(255) NOT NULL AUTO_INCREMENT,
+  `type_payment` varchar(100) NOT NULL,
+  `payment` double NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `orderID` int(255) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `comments` text NOT NULL,
+  `date` int(20) NOT NULL,
+  `time` varchar(20) NOT NULL,
+  `date_due` int(11) NOT NULL,
+  `customerID` int(255) NOT NULL,
+  `cash_change` float NOT NULL,
+  `credit_status` int(11) NOT NULL,
+  PRIMARY KEY (`paymentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+
+mysql_query("CREATE TABLE `tbl_purchases` (
+  `purchaseID` int(255) NOT NULL AUTO_INCREMENT,
+  `itemID` int(255) NOT NULL,
+  `quantity` float NOT NULL,
+  `price` float NOT NULL,
+  `subtotal` float NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `profit` float NOT NULL,
+  `loss` float NOT NULL,
+  `orderID` int(255) NOT NULL,
+  `state` int(11) NOT NULL,
+  `costprice` float NOT NULL,
+  `customerID` int(255) NOT NULL,
+  `date_ordered` varchar(20) NOT NULL,
+  `serial_number` text NOT NULL,
+  `date_ordered_int` int(11) NOT NULL,
+  `item_detail_id` int(11) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  PRIMARY KEY (`purchaseID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+");
+
+
+mysql_query("CREATE TABLE `tbl_receiving` (
+  `receiveID` int(255) NOT NULL AUTO_INCREMENT,
+  `itemID` int(255) NOT NULL,
+  `quantity` float NOT NULL,
+  `costprice` float NOT NULL,
+  `total_cost` float NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `orderID` int(255) NOT NULL,
+  `date_received` int(11) NOT NULL,
+  `serial_number` text NOT NULL,
+  PRIMARY KEY (`receiveID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+
+mysql_query("CREATE TABLE `tbl_soa` (
+  `soaID` int(255) NOT NULL AUTO_INCREMENT,
+  `creditID` int(255) NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `date` varchar(20) NOT NULL,
+  `time` varchar(20) NOT NULL,
+  `orderID` varchar(255) NOT NULL,
+  `customerID` int(11) NOT NULL,
+  `total` double NOT NULL,
+  `paid` int(11) NOT NULL,
+  PRIMARY KEY (`soaID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+
+mysql_query("CREATE TABLE `tbl_suppliers` (
+  `supplierID` int(255) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(100) NOT NULL,
+  `supplier_company` varchar(100) NOT NULL,
+  `supplier_number` varchar(100) NOT NULL,
+  `supplier_address` varchar(100) NOT NULL,
+  `deleted` int(20) NOT NULL,
+  `x2` int(20) NOT NULL,
+  `x3` int(20) NOT NULL,
+  PRIMARY KEY (`supplierID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");  
+
+
+mysql_query("CREATE TABLE `tbl_users` (
+  `accountID` int(255) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  `type` varchar(10) NOT NULL,
+  `employee_name` varchar(50) NOT NULL,
+  `themes` varchar(50) NOT NULL,
+  `deleted` int(10) NOT NULL,
+  `items` int(11) NOT NULL,
+  `customers` int(11) NOT NULL,
+  `sales` int(11) NOT NULL,
+  `receiving` int(11) NOT NULL,
+  `users` int(11) NOT NULL,
+  `reports` int(11) NOT NULL,
+  `suppliers` int(11) NOT NULL,
+  `credits` int(11) NOT NULL,
+  `expenses` int(11) NOT NULL,
+  PRIMARY KEY (`accountID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+}
 
 class Template
 {
