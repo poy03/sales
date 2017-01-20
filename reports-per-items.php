@@ -212,7 +212,10 @@ include 'db.php';
 	<?php
 	if($logged==1||$logged==2){
 	if($reports=='1'){
-		echo "<center><h3>Sales in ".date("F d, Y - ",strtotime($f)).date("F d, Y",strtotime($t))."</h3></center>";
+		if(isset($_GET["all"])){
+		}else{
+			echo "<center><h3>Sales in ".date("F d, Y - ",strtotime($f)).date("F d, Y",strtotime($t))."</h3></center>";
+		}
 		?>
 		
 <!-- 		<h5 id="hide" style="text-align:center">
@@ -244,6 +247,11 @@ include 'db.php';
 
 
 					$query = "SELECT * FROM tbl_purchases WHERE itemID = '".$_GET["by"]."'";
+					if(isset($_GET["all"])){
+					
+					}else{
+						$query.=" AND date_ordered_int BETWEEN '".strtotime($f)."' AND '".strtotime($t)."'";
+					}
 
 					$numitemquery = mysql_query($query);
 					$numitem = mysql_num_rows($numitemquery);

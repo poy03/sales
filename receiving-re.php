@@ -136,6 +136,26 @@ include 'db.php';
 			});
 		});
   
+
+  		$("#confirm").click(function(e){
+  			var reason = $("#comments").val();
+  			var id = $("#id").val();
+  			alert(id);
+  			if(reason!=""){
+	  			$.ajax({
+	  				type: "POST",
+	  				url: "receiving-delete",
+	  				data: "deleted_comment="+reason+"&id="+id,
+	  				cache: false,
+	  				success: function(data){
+	  					// alert(data);
+	  					// alert("deleted_comment="+reason+"&id="+id);
+	  					// location.reload();
+	  					console.log(data);
+	  				}
+	  			});
+  			}
+  		});
   
   
   });
@@ -280,8 +300,8 @@ include 'db.php';
 	   </nav>	
 <div class="container-fluid">
   <div class='row'>
-  	<div class='col-md-12 prints'>
-	
+  	<div class='col-md-12'>
+
 	
 	<?php
 	if($logged==1||$logged==2){
@@ -294,6 +314,7 @@ include 'db.php';
 				$time_received = $receiving_orders_row["time_received"];
 				$date_received = $receiving_orders_row["date_received"];
 				$comments = $receiving_orders_row["comments"];
+				$deleted = $receiving_orders_row["deleted"];
 				$supplierID = $receiving_orders_row["supplierID"];
 				$dbaccountID = $receiving_orders_row["accountID"];
 				$supplier_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_suppliers WHERE supplierID='$supplierID'"));
@@ -363,28 +384,90 @@ include 'db.php';
 	";
 	}
 	echo "
-	</table>
-	<b>Comments:</b>
-	$comments
+	</table>";
+		echo "
+			<div class='prints col-md-12'>
+			<div class='col-md-6'>
+			<button onclick='myFunction()' class='btn btn-primary btn-block'><span class='glyphicon glyphicon-print'></span> Print</button>
+			</div>
+			";
+
+
+			if($deleted==0){
+				echo "
+				<div class='col-md-6'>
+				<button class='btn btn-danger btn-block'  data-toggle = 'modal' data-target = '#myModal'><span class='glyphicon glyphicon-trash'></span> Delete Receiving</button>
+				</div>
+
+				";
+			}else{
+				echo "<br>";
+				echo "<br>";
+			}
+			echo "
+			
+			<b>Comments:</b>
+			$comments
+			</div>
+			<script>
+	function myFunction() {
+	    window.print();
+	}
+	</script>
+			
+			";
+
+	echo "
+
 	</div>
 	";
 	?>
+
+				<!-- Modal -->
+	<div class = "modal fade" id = "myModal" tabindex = "-1" role = "dialog" 
+	   aria-labelledby = "myModalLabel" aria-hidden = "true">
+	   
+	   <div class = "modal-dialog">
+	      <div class = "modal-content">
+	         <form action='#' method='get'>
+	         <div class = "modal-header">
+	            <button type = "button" class = "close" data-dismiss = "modal" aria-hidden = "true">
+	                  &times;
+	            </button>
+	            
+	            <h4 class = "modal-title" id = "myModalLabel">
+	               Delete this Receiving?
+	            </h4>
+	         </div>
+	         
+	         <div class = "modal-body">
+	            <label><b>Reason for deleting this Receiving:<br><small><i>* Note: Items will be automatically subtracted from inventory.</i></small></b></label>
+	            <input type='hidden' id='id' value='<?php echo $id; ?>'>
+				<textarea id='comments' class='form-control' required='required'></textarea>
+				
+	         </div>
+	         
+	         <div class = "modal-footer">
+	            <button type = "button" class = "btn btn-default" data-dismiss = "modal">
+	               Cancel
+	            </button>
+	            
+	            <button type = "button" class = "btn btn-danger" id='confirm' type='submit'>
+	               Confirm
+	            </button>
+	         </div>
+	         </form>
+	      </div><!-- /.modal-content -->
+	   </div><!-- /.modal-dialog -->
+	  
+	</div><!-- /.modal -->
 	<?php
 	}else{
 		echo "<strong><center>You do not have the authority to access this module.</center></strong>";
 	}
 	}else{
-	?>
-	Login
-	<form action='login' role='form' method='post'>
-	<input type='text' name='username' placeholder='Login Name' class='form-control'>
-	<input type='Password' name='password' placeholder='Password' class='form-control'>
-	<button class='btn btn-primary' name='login' type='submit'>Login
-	</button>
-	</form>
-
-	<?php 
-	} ?>
+		header("location:index");
+		} ?>
 	</div>
   </div>
 </div>

@@ -29,6 +29,10 @@ include 'db.php';
 			(isset($_POST["category"])&&$_POST["category"]!="")
 			){
 
+			if(isset($_POST["item_name"])&&$_POST["item_name"]!=""){
+				$query.=" itemID ='".$_POST["item_name"]."' AND";
+			}
+
 			if(isset($_POST["serial_number"])&&$_POST["serial_number"]!=""){
 				$query.=" item_detail_id ='".$_POST["serial_number"]."' AND";
 			}
@@ -93,7 +97,7 @@ include 'db.php';
 				$user_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_users WHERE accountID='$user_accountID'"));
 				if(strtolower($type)=="sales"||strtolower($type)=="sales delete"){
 					$referenceID = "<a href='sales-re?id=".$referenceID."'>S".sprintf("%06d",$referenceID)."</a>";
-				}elseif(strtolower($type)=="purchase"||strtolower($type)=="stock in"){
+				}elseif(strtolower($type)=="purchase"||strtolower($type)=="stock in"||strtolower($type)=="purchase delete"){
 					$referenceID = "<a href='receiving-re?id=".$referenceID."'>R".sprintf("%06d",$referenceID)."</a>";
 				}
 				echo "

@@ -106,10 +106,13 @@ include 'db.php';
 
 	    $("#history-clear").click(function(e){
 	    	$("#serial_number-search").removeAttr("readonly");
+	    	$("#serial_number-search").val("");
 
 	    	$("#item_name-search").removeAttr("readonly");
+	    	$("#item_name-search").val("");
 
 	    	$("#category-search").removeAttr("readonly");
+	    	$("#category-search").val("");
 
 
 
@@ -724,7 +727,8 @@ include 'db.php';
 			<br>
 			<button class='btn btn-primary btn-block' type='submit' name='submit'><span class='glyphicon glyphicon-download-alt'></span> View Receiving Cost</button>
 			</form>
-			</div>			
+			</div>	
+
 			";
 		}elseif($tab=='4'){ // expenses reports
 			echo "
@@ -735,6 +739,8 @@ include 'db.php';
 			<input type='text' class='form-control' id='date_customer_f_1' name='f' placeholder='Pick a Date' value='".date("m/d/Y")."' required='required'>
 			<label>To:</label>
 			<input type='text' class='form-control' id='date_customer_t_1' name='t' placeholder='Pick a Date' value='".date("m/d/Y")."' required='required'>
+			<input type='checkbox' name='all'>
+			<label>View All Dates:</label>
 			<br>
 			<button class='btn btn-primary btn-block' type='submit' name='submit'><span class='glyphicon glyphicon-usd'></span> View Expenses</button>
 			
@@ -962,6 +968,8 @@ include 'db.php';
 
 			<label>To:</label>
 			<input type='text' class='form-control' id='date_to' name='t' placeholder='Pick a Date' value='".date("m/d/Y")."' required='required'>
+			<input type='checkbox' name='all'>
+			<label>View All Dates</label>
 			<br>
 			<button class='btn btn-primary btn-block' type='submit' name='submit'><span class='glyphicon glyphicon-stats'></span> Make Report</button>
 			
@@ -1044,8 +1052,9 @@ include 'db.php';
 							<option value="all">All</option>
 							<option value="sales">Sales</option>
 							<option value="stock in">Stock In</option>
-							<option value="sales delete">Sales Delete</option>
 							<option value="purchase">Purchase</option>
+							<option value="sales delete">Deleted Sales</option>
+							<option value="purchase delete">Deleted Purchases</option>
 						</select>
 					</div>
 					<input type="hidden" id="serial_number" name="serial_number" placeholder="Serial Number">

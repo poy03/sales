@@ -11,7 +11,7 @@ if(isset($_COOKIE["LOGGED"])){
 $type='';
 error_reporting(0);
 $list_modules = array();
-define("APP_VERSION","1.0");
+define("APP_VERSION","1.01");
 define("DB_NAME","jbtech_pos");
 define("DB_USER","root");
 define("DB_PASSWORD","");

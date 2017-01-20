@@ -54,13 +54,15 @@ $search=@$_GET['search'];
 						$new_item_data = mysql_fetch_array(mysql_query("SELECT * FROM tbl_items_detail WHERE itemID='$itemID' ORDER BY item_detail_id DESC LIMIT 1"));
 						$item_detail_id = $new_item_data["item_detail_id"];
 
-						mysql_query("INSERT INTO tbl_receiving VALUES ('','$item_detail_id','$quantity[$i]','$receiving_costprice[$i]','$total_cost[$i]','$accountID','0','".strtotime($date_received)."','$serial_number[$i]')");
+							
+							mysql_query("INSERT INTO tbl_receiving (itemID,quantity,costprice,total_cost,accountID,orderID,date_received,serial_number,supplierID) VALUES ('$item_detail_id','$quantity[$i]','$receiving_costprice[$i]','$total_cost[$i]','$accountID','0','".strtotime($date_received)."','$serial_number[$i]','$supplierID')");
 
 					}else{
+						
 						mysql_query("UPDATE tbl_items SET costprice='$costprice[$i]' WHERE itemID='$itemID'");
 						$new_item_detail_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_items_detail WHERE itemID='$itemID'")); 
 						$item_detail_id = $new_item_detail_data["item_detail_id"];
-						mysql_query("INSERT INTO tbl_receiving VALUES ('','$item_detail_id','$quantity[$i]','$receiving_costprice[$i]','$total_cost[$i]','$accountID','0','".strtotime($date_received)."','$serial_number[$i]')");
+						mysql_query("INSERT INTO tbl_receiving (itemID,quantity,costprice,total_cost,accountID,orderID,date_received,serial_number,supplierID) VALUES ('$item_detail_id','$quantity[$i]','$receiving_costprice[$i]','$total_cost[$i]','$accountID','0','".strtotime($date_received)."','$serial_number[$i]','$supplierID')");
 					}
 
 

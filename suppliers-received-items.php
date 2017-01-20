@@ -65,6 +65,17 @@ include 'db.php';
 			});
 			}
 	  });
+
+	  $("#date_to,#date_from").datepicker();
+	  $("#date_to,#date_from").change(function(){
+	  	var date_from = $("#date_from").val();
+	  	var date_to = $("#date_to").val();
+	  	var id = $("#id").val();
+	  	var itemID = $("#item").val();
+	  	if(date_from!=""&&date_to!=""){
+	  		window.location = "?id=" +id+ "&f=" +date_from + "&t=" +date_to+"&item="+itemID;
+	  	}
+	  });
 	  
 	  $(".select").change(function(){
 		  if(this.checked){
@@ -79,6 +90,14 @@ include 'db.php';
             $(':checkbox', this).trigger('click');
         }
     });
+
+	   	$("#item").change(function(){
+	   		var date_from = $("#date_from").val();
+	   		var date_to = $("#date_to").val();
+	   		var id = $("#id").val();
+	   		var itemID = $("#item").val();
+	 		window.location = "?id=" +id+ "&f=" +date_from + "&t=" +date_to+"&item="+itemID;
+	   	});
 	
 	$("#cat").change(function(){
 		var cat = $(this).val();
@@ -231,173 +250,168 @@ include 'db.php';
 	
 	<?php
 	if($logged==1||$logged==2){
-	if($suppliers==1){
-	if(isset($_POST["edit"])){
-		$x = array();
-		$x = $_POST["select"];
-		$_SESSION["selectsupplier"]=$x;
-		header("location:suppliers-edit");
-	}
 
-
-	if(isset($_POST["delete"])){
-		$x = array();
-		$x = @$_POST["select"];
-		$_SESSION["selectsupplier"]=$x;
-		if($x!=NULL){ 
-		?>
-		<script type="text/javascript">
-			$(document).ready(function() {
-				 var conf = confirm("Are you sure you want to delete selected items?");
-				 if(conf==true){
-					 window.location="suppliers-delete";
-				 }
-			});
-		</script>
-		<?php
-
-		}
-	}
-	?>
-	<form action="suppliers" method='post'>
-	<div class='col-md-2'>
-	<label>Controls:</label>
-	<span class='btn btn-primary btn-block' name='add' id='add'><span class='glyphicon glyphicon-phone'></span> Add Suppliers</span>
-	<?php if($type=='admin'){ ?>
-	<button class='btn btn-primary btn-block' name='edit' type='submit'><span class='glyphicon glyphicon-edit'></span> Edit Suppliers</button>
-	<button class='btn btn-danger btn-block' name='delete' type='submit' id='delete'><span class='glyphicon glyphicon-trash'></span> Delete Suppliers</button>
-	<input type='text' placeholder='Search for Supplier' id='suppliers' class='search form-control' style='margin-top:.5em;'>
-	<br>
-	<?php } ?>
-	</div>
-	<div class='table-responsive col-md-10'>
-	<table class='table table-hover tablesorter tablesorter-default' id='myTable'>
-	 <thead>
-	  <tr>
-	   <th><input type="checkbox" id="select-all" value='all'> All</th>
-	   <th>Contact Person</th>
-	   <th>Company Name</th>
-	   <th>Contact Number</th>
-	   <th>Address</th>
-	  </tr>
-	 </thead>
-	 <tbody>
-	 <?php
-		if(!isset($page)){$page=1;}elseif($page<=0){$page=1;}
-		$maxitem = $maximum_items_displayed; // maximum items
-		$limit = ($page*$maxitem)-$maxitem;
-	 $query = "SELECT * FROM tbl_suppliers WHERE deleted = 0";
-	 if(isset($_GET["id"])){
-		 $id = $_GET["id"];
-		 $query.= " AND supplierID = '$id'";
-	 }
-	 $query.=" ORDER BY supplier_name";
-	 $numitemquery = mysql_query($query);
-	 $numitem = mysql_num_rows($numitemquery);
-	 $query.=" LIMIT $limit, $maxitem";
-	 // echo $query;
-	 $itemquery = mysql_query($query);
-	 
-	 
-	 		if(($numitem%$maxitem)==0){
-				$lastpage=($numitem/$maxitem);
-			}else{
-				$lastpage=($numitem/$maxitem)-(($numitem%$maxitem)/$maxitem)+1;
+		if($suppliers==1){
+			$supplierID = $_GET["id"];
+			$supplier_query = mysql_query("SELECT * FROM tbl_suppliers WHERE supplierID='$supplierID'");
+			if(mysql_num_rows($supplier_query)==0){
+				// header("location:success");
 			}
-			$maxpage = 3;
-			
-	 
-	 
-	 if(mysql_num_rows($itemquery)!=0){
-		$i =0;
-		$q = @$_POST['select'];
-		
-		 while($itemrow=mysql_fetch_assoc($itemquery)){
-			 $supplierID = $itemrow["supplierID"];
-			 $supplier_name = $itemrow["supplier_name"];
-			 $supplier_company = $itemrow["supplier_company"];
-			 $supplier_number = $itemrow["supplier_number"];
-			 $supplier_address = $itemrow["supplier_address"];
-			 echo "
-			 <tr class='selected'>
-			  <td><input type='checkbox' name='select[]' value='$supplierID' class='select' ";
-			  if(isset($_POST["select"])){
-				  if(in_array($supplierID,$_POST['select'])) echo 'checked';
-			  }
-			  echo "></td>
-			  <td><a href='suppliers-received-items?id=$supplierID'>$supplier_name</a></td>
-			  <td>$supplier_company</td>
-			  <td>$supplier_number</td>
-			  <td>$supplier_address</td>
-			 </tr>
-			 ";
-	     $i++;
-		 }
-	 }
-	 ?>
-	 </tbody>
+			$supplier_data = mysql_fetch_assoc($supplier_query);
+			echo "
 
-	</table>
-	<div class='text-center'>
-<?php
-			echo "<ul class='pagination prints'>
-			
-			";
-			$url="?cat=$cat&";
-			$cnt=0;
-			if($page>1){
-				$back=$page-1;
-				echo "<li><a href = '".$url."page=1'>&laquo;&laquo;</a></li>";	
-				echo "<li><a href = '".$url."page=$back'>&laquo;</a></li>";	
-				for($i=($page-$maxpage);$i<$page;$i++){
-					if($i>0){
+			<input type='hidden' id='id' value='$supplierID'>
+			Company Name: <b>".$supplier_data["supplier_name"]."</b><br>
+			Address: <b>".$supplier_data["supplier_address"]."</b><br>
+			Contact Number: <b>".$supplier_data["supplier_number"]."</b><br>
+			<div class='table-responsive'>
+				<table class='table table-hover'>
+					<thead>
+						<tr>
+							<th>Receive ID</th>
+							<th>Date</th>
+							<th>Item Name</th>
+							<th>Serial Number</th>
+							<th>Selling Price</th>
+						</tr>
+					</thead>
+					<tbody>";
+					if(!isset($page)){$page=1;}elseif($page<=0){$page=1;}
+					$maxitem = $maximum_items_displayed; // maximum items
+					$limit = ($page*$maxitem)-$maxitem;
+					$query = "SELECT * FROM tbl_receiving WHERE supplierID='$supplierID' AND deleted='0'";
+					$item = @$_GET["item"];
+					if(isset($item)&&$item!=0){
+						$query.=" AND itemID='$item'";
+					}
+					$date_from = @$_GET["f"];
+					$date_to = @$_GET["t"];
+
+					if((isset($date_from)&&isset($date_to))&&($date_from!=""&&$date_to!="")){
+						$query.=" AND date_received BETWEEN '".strtotime($date_from)."' AND '".strtotime($date_to)."'";
+					}
+
+					if((isset($date_from)&&isset($date_to))&&($date_from!=""&&$date_to!="")){
+						$query.= " ORDER BY date_received ASC";
+					}else{
+						$query.= " ORDER BY date_received DESC";
+						
+					}
+
+
+					$numitemquery = mysql_query($query);
+					$numitem = mysql_num_rows($numitemquery);
+					$query.=" LIMIT $limit, $maxitem";
+
+			 		if(($numitem%$maxitem)==0){
+						$lastpage=($numitem/$maxitem);
+					}else{
+						$lastpage=($numitem/$maxitem)-(($numitem%$maxitem)/$maxitem)+1;
+					}
+					$maxpage = 3;
+
+					// echo $query;
+					$supplier_purchases_query = mysql_query($query);
+					$list_of_items_purchased = array();
+					if(mysql_num_rows($supplier_purchases_query)!=0){
+						while($supplier_purchases_row=mysql_fetch_assoc($supplier_purchases_query)){
+							$orderID = $supplier_purchases_row["orderID"];
+							$date_ordered = $supplier_purchases_row["date_received"];
+							$itemID = $supplier_purchases_row["itemID"];
+							$item_detail_id = $supplier_purchases_row["item_detail_id"];
+							$item_detail_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_items_detail WHERE item_detail_id='$itemID'"));
+							$price = $supplier_purchases_row["costprice"];
+							$item_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_items WHERE itemID='".$item_detail_data["itemID"]."'"));
+							$list_of_items_purchased[] = $itemID;
+							echo "
+							<tr>
+								<td><a href='receiving-re?id=$orderID'>R".sprintf("%06d",$orderID)."</a></td>
+								<td>".date("m/d/Y",$date_ordered)."</td>
+								<td><a href='item?s=$itemID'>".$item_data["itemname"]."</a></td>
+								<td>".$supplier_purchases_row["serial_number"]."</td>
+								<td>".number_format($price,2)."</td>
+							</tr>
+							";
+						}
+
+						$list_of_items_purchased = array_unique($list_of_items_purchased);//removes duplicate data
+						sort($list_of_items_purchased);//rearrange indexes in array
+					}
+					
+					echo "
+					</tbody>";
+					echo "
+					<label>Date From: </label><input type='text' id='date_from' value='$date_from'>
+					<label>Date to: </label><input type='text' id='date_to' value='$date_to'>
+					";
+					echo "<label>Item: </label><select id='item'><option value='0'>All Items</option>";
+					foreach ($list_of_items_purchased as $itemID) {
+						$item_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_items WHERE itemID='$itemID'"));
+						echo "<option value='$itemID' ";
+						if($itemID==$item){
+							echo "selected='selected'";
+						}
+						echo ">".$item_data["itemname"]."</option>";
+					}
+					echo "</select>";
+					echo "<a href='?id=$supplierID'>Reset Filter</a>";
+
+				echo "
+				</table>";
+
+				echo "<div class='text-center'><ul class='pagination prints'>
+				
+				";
+				$url="?id=$supplierID&f=$date_from&t=$date_to&";
+				$cnt=0;
+				if($page>1){
+					$back=$page-1;
+					echo "<li><a href = '".$url."page=1'>&laquo;&laquo;</a></li>";	
+					echo "<li><a href = '".$url."page=$back'>&laquo;</a></li>";	
+					for($i=($page-$maxpage);$i<$page;$i++){
+						if($i>0){
+							echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+						}
+						$cnt++;
+						if($cnt==$maxpage){
+							break;
+						}
+					}
+				}
+				
+				$cnt=0;
+				for($i=$page;$i<=$lastpage;$i++){
+					$cnt++;
+					if($i==$page){
+						echo "<li class='active'><a href = '#'>$i</a></li>";	
+					}else{
 						echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
 					}
-					$cnt++;
 					if($cnt==$maxpage){
 						break;
 					}
 				}
-			}
-			
-			$cnt=0;
-			for($i=$page;$i<=$lastpage;$i++){
-				$cnt++;
-				if($i==$page){
-					echo "<li class='active'><a href = '#'>$i</a></li>";	
-				}else{
+				
+				$cnt=0;
+				for($i=($page+$maxpage);$i<=$lastpage;$i++){
+					$cnt++;
 					echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+					if($cnt==$maxpage){
+						break;
+					}
 				}
-				if($cnt==$maxpage){
-					break;
+				if($page!=$lastpage&&$numitem>0){
+					$next=$page+1;
+					echo "<li><a href = '".$url."page=$next'>&raquo;</a></li>";
+					echo "<li><a href = '".$url."page=$lastpage'>&raquo;&raquo;</a></li>";
 				}
-			}
+				echo "</ul><span class='page' >Page $page</span></div>";
+				
+			echo "
+			</div>
+			";
 			
-			$cnt=0;
-			for($i=($page+$maxpage);$i<=$lastpage;$i++){
-				$cnt++;
-				echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
-				if($cnt==$maxpage){
-					break;
-				}
-			}
-			if($page!=$lastpage&&$numitem>0){
-				$next=$page+1;
-				echo "<li><a href = '".$url."page=$next'>&raquo;</a></li>";
-				echo "<li><a href = '".$url."page=$lastpage'>&raquo;&raquo;</a></li>";
-			}
-			echo "</ul><span class='page' >Page $page</span></div>";
-			
-			?>
-	</div>
-	</div>
-	</form>
-
-	
-	<?php
-	}else{
-		echo "<strong><center>You do not have the authority to access this module.</center></strong>";
-	}
+		}
 	}else{
 	?>
 	Login

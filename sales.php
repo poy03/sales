@@ -543,11 +543,18 @@ if(mysql_num_rows($cart_query)==0){
 	</select>
 	<br>
 	<br>
-	<label>Terms:</label>
-	<input type='number' min='1' name='terms' class='form-control' id='terms' tabindex='-1' placeholder='Number of Days' value='<?php echo $terms; ?>'>
+
+	<?php
+	if($customerID!=0){
+	echo "	<label>Terms:</label>
+	<input type='number' min='0' name='terms' class='form-control' id='terms' tabindex='-1' placeholder='Number of Days' value='<?php echo $terms; ?>'>
 	<small><i>* For Credits Only.</i></small>
 	<br>
-	<br>
+	<br>";		
+	}
+
+	?>
+
 	<span><b>Comments:</b></span>
 	<textarea name='comments' class='form-control' tabindex='-1'><?php echo $comments; ?></textarea>
 	

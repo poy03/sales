@@ -417,7 +417,33 @@ include 'db.php';
 	 }
 	 ?>
 	 </tbody>
+	 <tfoot>
+	 	<tr>
+	 		<td>Total</td>
+	 		<td><?php
+	 		if($cat!="all"&&$cat!=""){
+	 			if(isset($_GET["cat"])){
+	 				$item_query = mysql_query("SELECT * FROM tbl_items WHERE category='$cat'");
+	 				// echo "SELECT * FROM tbl_items WHERE category='$cat'";
+	 				$sum_of_all_items = 0;
+	 				while ($row=mysql_fetch_assoc($item_query)) {
+	 					$itemID = $row["itemID"];
+	 					// echo "SELECT SUM(quantity) as sum_per_items FROM tbl_items_detail WHERE itemID='$itemID'";
+	 					$sum_per_items = mysql_fetch_assoc(mysql_query("SELECT SUM(quantity) as sum_per_items FROM tbl_items_detail WHERE itemID='$itemID' AND deleted='0'"));
+	 					// echo $sum_per_items["sum_per_items"];
+	 					$sum_of_all_items+=$sum_per_items["sum_per_items"];
+	 				}
+	 				echo $sum_of_all_items;
+	 			}
+	 		}else{
+	 			$item_detail_data = mysql_fetch_assoc(mysql_query("SELECT SUM(quantity) as sum_per_items FROM tbl_items_detail WHERE deleted='0'"));
+	 			echo $item_detail_data["sum_per_items"];
+	 		}
 
+
+	 		?></td>
+	 	</tr>
+	 </tfoot>
 	</table>
 <?php
 			echo "

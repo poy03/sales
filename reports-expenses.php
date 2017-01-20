@@ -192,7 +192,11 @@ include 'db.php';
 	<?php
 	if($logged==1||$logged==2){
 	if($reports=='1'){
-		echo "<center><h3>Expenses in ".date("F d, Y - ",strtotime($f)).date("F d, Y",strtotime($t))."</h3></center>";
+		if(isset($_GET["all"])){
+
+		}else{
+			echo "<center><h3>Expenses in ".date("F d, Y - ",strtotime($f)).date("F d, Y",strtotime($t))."</h3></center>";
+		}
 	?>
 	<div class='table-responsive'>
 	<button class="btn btn-primary prints" onclick="window.print()"><span class="glyphicon glyphicon-print"></span> Print</button>
@@ -208,7 +212,14 @@ include 'db.php';
 	</thead>
 	<tbody>
 		<?php
-		$expenses_query = mysql_query("SELECT * FROM tbl_orders_expenses WHERE date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."' AND deleted='0'");
+		$query = "SELECT * FROM tbl_orders_expenses WHERE deleted='0'";
+		if(isset($_GET["all"])){
+		}else{
+			$query .=" AND date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."'";
+
+		}
+		// echo $query;
+		$expenses_query = mysql_query($query);
 		$total_expenses = 0;
 		if(mysql_num_rows($expenses_query)!=0){
 			while($expenses_row=mysql_fetch_assoc($expenses_query)){
