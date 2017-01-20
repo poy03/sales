@@ -331,18 +331,6 @@ mysql_query("CREATE TABLE `tbl_orders` (
   PRIMARY KEY (`orderID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-mysql_query("CREATE TABLE `tbl_orders_expenses` (
-  `orderID` int(255) NOT NULL AUTO_INCREMENT,
-  `date_of_expense` int(11) NOT NULL,
-  `time_expended` varchar(20) NOT NULL,
-  `description` text NOT NULL,
-  `expenses` double NOT NULL,
-  `comments` text NOT NULL,
-  `accountID` int(255) NOT NULL,
-  `deleted` int(11) NOT NULL,
-  PRIMARY KEY (`orderID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-
 mysql_query("CREATE TABLE `tbl_orders_receiving` (
   `orderID` int(255) NOT NULL AUTO_INCREMENT,
   `total_cost` float NOT NULL,
@@ -353,7 +341,24 @@ mysql_query("CREATE TABLE `tbl_orders_receiving` (
   `supplierID` int(255) NOT NULL,
   `mode` varchar(20) NOT NULL,
   `deleted` int(11) NOT NULL,
+  `deleted_comment` text NOT NULL,
+  `deleted_date` int(11) NOT NULL,
   PRIMARY KEY (`orderID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_receiving` (
+  `receiveID` int(255) NOT NULL AUTO_INCREMENT,
+  `itemID` int(255) NOT NULL,
+  `quantity` float NOT NULL,
+  `costprice` float NOT NULL,
+  `total_cost` float NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `orderID` int(255) NOT NULL,
+  `date_received` int(11) NOT NULL,
+  `serial_number` text NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `supplierID` int(11) NOT NULL,
+  PRIMARY KEY (`receiveID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
 mysql_query("CREATE TABLE `tbl_payments` (
