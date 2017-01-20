@@ -242,6 +242,10 @@ include 'db.php';
 						$query.=")";
 					}
 
+					if(!isset($_GET["all"])){
+						$query.=" AND date_ordered_int BETWEEN '".strtotime($f)."' AND '".strtotime($t)."'";
+					}
+					
 					$numitemquery = mysql_query($query);
 					$numitem = mysql_num_rows($numitemquery);
 					$query.=" LIMIT $limit, $maxitem";

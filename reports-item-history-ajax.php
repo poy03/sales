@@ -26,12 +26,18 @@ include 'db.php';
 			(isset($_POST["date_from"])&&$_POST["date_from"]!="")||
 			(isset($_POST["date_to"])&&$_POST["date_to"]!="")||
 			(isset($_POST["item_name"])&&$_POST["item_name"]!="")||
+			(isset($_POST["reference_number"])&&$_POST["reference_number"]!="")||
 			(isset($_POST["category"])&&$_POST["category"]!="")
 			){
 
 			if(isset($_POST["item_name"])&&$_POST["item_name"]!=""){
 				$query.=" itemID ='".$_POST["item_name"]."' AND";
 			}
+			
+			if(isset($_POST["reference_number"])&&$_POST["reference_number"]!=""){
+				$query.=" reference_number ='".$_POST["reference_number"]."' AND";
+			}
+			
 
 			if(isset($_POST["serial_number"])&&$_POST["serial_number"]!=""){
 				$query.=" item_detail_id ='".$_POST["serial_number"]."' AND";
