@@ -317,7 +317,11 @@ include 'db.php';
 				<ul class='pagination prints'>
 				
 				";
-				$url="?by=$by&f=$f&t=$t&";
+				if(isset($_GET["all"])){
+					$url="?by=$by&f=$f&t=$t&all=on&";
+				}else{
+					$url="?by=$by&f=$f&t=$t&";
+				}
 				$cnt=0;
 				if($page>1){
 					$back=$page-1;

@@ -1004,6 +1004,8 @@ include 'db.php';
 
 			<label>To:</label>
 			<input type='text' class='form-control' id='date_to' name='t' placeholder='Pick a Date' value='".date("m/d/Y")."' required='required'>
+			<input type='checkbox' name='all'>
+			<label>View All Dates</label>
 			<br>
 			<button class='btn btn-primary btn-block' type='submit' name='submit'><span class='glyphicon glyphicon-stats'></span> Make Report</button>
 			

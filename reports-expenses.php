@@ -212,13 +212,30 @@ include 'db.php';
 	</thead>
 	<tbody>
 		<?php
+		if(!isset($page)){$page=1;}elseif($page<=0){$page=1;}
+		$maxitem = $maximum_items_displayed; // maximum items
+		$limit = ($page*$maxitem)-$maxitem;
+
+
 		$query = "SELECT * FROM tbl_orders_expenses WHERE deleted='0'";
 		if(isset($_GET["all"])){
 		}else{
 			$query .=" AND date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."'";
 
 		}
-		// echo $query;
+		$numitemquery = mysql_query($query);
+		$numitem = mysql_num_rows($numitemquery);
+		$query.=" LIMIT $limit, $maxitem";
+		echo $query;
+
+ 		if(($numitem%$maxitem)==0){
+			$lastpage=($numitem/$maxitem);
+		}else{
+			$lastpage=($numitem/$maxitem)-(($numitem%$maxitem)/$maxitem)+1;
+		}
+		$maxpage = 3;
+
+
 		$expenses_query = mysql_query($query);
 		$total_expenses = 0;
 		if(mysql_num_rows($expenses_query)!=0){
@@ -255,6 +272,67 @@ include 'db.php';
 	?>
 	</tfoot>
 	</table>
+	<?php 
+		echo "
+	<div class='text-center'>
+		<ul class='pagination prints'>
+		
+		";
+		// $url="?cat=$cat&sort=$sort&";
+		if(isset($_GET["all"])){
+			$all = $_GET["all"];
+			$url="?f=$f&t=$t&all=$all&submit=&";
+		}else{
+			$url="?f=$f&t=$t&submit=&";
+		}
+		$cnt=0;
+		if($page>1){
+			$back=$page-1;
+			echo "<li><a href = '".$url."page=1'>&laquo;&laquo;</a></li>";	
+			echo "<li><a href = '".$url."page=$back'>&laquo;</a></li>";	
+			for($i=($page-$maxpage);$i<$page;$i++){
+				if($i>0){
+					echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+				}
+				$cnt++;
+				if($cnt==$maxpage){
+					break;
+				}
+			}
+		}
+		
+		$cnt=0;
+		for($i=$page;$i<=$lastpage;$i++){
+			$cnt++;
+			if($i==$page){
+				echo "<li class='active'><a href = '#'>$i</a></li>";	
+			}else{
+				echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+			}
+			if($cnt==$maxpage){
+				break;
+			}
+		}
+		
+		$cnt=0;
+		for($i=($page+$maxpage);$i<=$lastpage;$i++){
+			$cnt++;
+			echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+			if($cnt==$maxpage){
+				break;
+			}
+		}
+		if($page!=$lastpage&&$numitem>0){
+			$next=$page+1;
+			echo "<li><a href = '".$url."page=$next'>&raquo;</a></li>";
+			echo "<li><a href = '".$url."page=$lastpage'>&raquo;&raquo;</a></li>";
+		}
+		echo "</ul><span class='page' >Page $page</span>
+		</div>
+		";
+		
+
+	 ?>
 	</div>
 	
 	<?php

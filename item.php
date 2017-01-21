@@ -419,7 +419,7 @@ include 'db.php';
 	 </tbody>
 	 <tfoot>
 	 	<tr>
-	 		<td>Total</td>
+	 		<th colspan="6" style="text-align: right;">Total of Items:</th>
 	 		<td><?php
 	 		if($cat!="all"&&$cat!=""){
 	 			if(isset($_GET["cat"])){

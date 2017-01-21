@@ -140,7 +140,7 @@ include 'db.php';
   		$("#confirm").click(function(e){
   			var reason = $("#comments").val();
   			var id = $("#id").val();
-  			alert(id);
+  			// alert(id);
   			if(reason!=""){
 	  			$.ajax({
 	  				type: "POST",
@@ -148,10 +148,10 @@ include 'db.php';
 	  				data: "deleted_comment="+reason+"&id="+id,
 	  				cache: false,
 	  				success: function(data){
-	  					// alert(data);
+	  					// alert("");
 	  					// alert("deleted_comment="+reason+"&id="+id);
-	  					// location.reload();
-	  					console.log(data);
+	  					location.reload();
+	  					// console.log(data);
 	  				}
 	  			});
   			}
@@ -215,89 +215,76 @@ include 'db.php';
   </style>
 </head>
 <body>
-	   <nav class = "navbar navbar-default" role = "navigation" id='heading'>
-	   <div class = "navbar-header">
-		  <button type = "button" class = "navbar-toggle" 
-			 data-toggle = "collapse" data-target = "#example-navbar-collapse">
-			 <span class = "sr-only">Toggle navigation</span>
-			 <span class = "icon-bar"></span>
-			 <span class = "icon-bar"></span>
-			 <span class = "icon-bar"></span>
-		  </button>
-		  <a class = "navbar-brand" href = "index"><?php echo $app_name; ?></a>
-	   </div>
-	   
-	   <div class = "collapse navbar-collapse" id = "example-navbar-collapse">
-		  <ul class = "nav navbar-nav  navbar-left">
-			 
-			 <?php if($items=='1'){ ?>
-			 <li><a href="item"><span class = "glyphicon glyphicon-briefcase"></span> Items <span class = "badge"><?php echo $badge_i; ?></span></a></li>
-			 <?php } ?>
-			 <?php if($customers=='1'){ ?>
-			 <li><a href="customer"><span class = "glyphicon glyphicon-user"></span> Customers</a></li>				 
-			 <?php } ?>
-			 <?php if($sales=='1'){ ?>
-			 <li><a href="sales"><span class = "glyphicon glyphicon-shopping-cart"></span> Sales <kbd>F2</kbd> <span class = "badge"><?php echo $badge; ?></span> </a></li>	  
-			 <?php } ?>
-			 <?php if($suppliers=='1'){ ?>
-			 <li><a href="suppliers"><span class="glyphicon glyphicon-phone"></span> Suppliers</a></li>		  
-			 <?php } ?>
-			 <?php if($receiving=='1'){ ?>
-			 <li class='active'><a href="receiving"><span class = "glyphicon glyphicon-download-alt"></span> Receiving <span class = "badge"><?php echo $badge_r; ?></span></a></li>		  
-			 <?php } ?>
-			 
-			 <?php if($users=='1'){ ?>
-			 <li><a href="users"><span class = "glyphicon glyphicon-user"></span> Users</a></li>		  
-			 <?php } ?>
-			 <?php if($reports=='1'){ ?>
-			 <li><a href="reports"><span class = "glyphicon glyphicon-stats"></span> Reports</a></li>		  
-			 <?php } ?>
-			 <?php if($credits=='1'){ ?>
-			 <li><a href="credits"><span class = "glyphicon glyphicon-copyright-mark"></span> Credits <?php echo "<span class='badge'>$badge_credit</span>"; ?></a></li>		  
-			 <?php } ?>				 
-			 <?php if($type=='admin'){?>
-		     <li><a href='expenses'><span class='glyphicon glyphicon-usd'></span> Expenses</a></li>
-		     <?php } ?>
-			 <?php if($logged!=0){ ?>
-			 <div class="form-group navbar-form navbar-right">
-				<input type="text" class="form-control" placeholder="Search" name='search' id='search' autocomplete='off'><div id='item_results'></div>
-			 </div>
-			 <?php } ?>
-						
-		  </ul>
+   <nav class = "navbar navbar-default" role = "navigation" id='heading'>
+   <div class = "navbar-header">
+	  <button type = "button" class = "navbar-toggle" 
+		 data-toggle = "collapse" data-target = "#example-navbar-collapse">
+		 <span class = "sr-only">Toggle navigation</span>
+		 <span class = "icon-bar"></span>
+		 <span class = "icon-bar"></span>
+		 <span class = "icon-bar"></span>
+	  </button>
+	  <a class = "navbar-brand" href = "index"><?php echo $app_name; ?></a>
+   </div>
+   
+   <div class = "collapse navbar-collapse" id = "example-navbar-collapse">
+	  <ul class = "nav navbar-nav  navbar-left">
+	  <?php
+	  $header = new Template;
+	  foreach ($list_modules as $module) {
+		if($module==1){
+			$badge_arg = $badge_i;
+		}elseif($module==3){
+			$badge_arg = $badge;
+		}elseif($module==8){
+			$badge_arg = $badge_credit;
+		}else{
+			$badge_arg = 0;
+		}
+		echo $header->header($module,$badge_arg,1);
+	  }
+	  ?>
 
-		  
-		  
-		  <?php 
-		  if($logged==0){
+	 <?php if($logged!=0){ ?>
+	 <div class="form-group navbar-form navbar-right">
+		<input type="text" class="form-control" placeholder="Search" name='search' id='search' autocomplete='off'><div id='item_results'></div>
+	 </div>
+	 <?php } ?>
+					
+	  </ul>
+
+	  
+	  
+	  <?php 
+	  if($logged==0){
+		
+	  ?>
+	  	<ul class='nav navbar-nav navbar-right'>
+			<li><a href='login'><span class='glyphicon glyphicon-log-in'></span> Login</a></li>
+		</ul>
+	  <?php }else{ ?>
+	  	<ul class='nav navbar-nav navbar-right'>
 			
-		  ?>
-		  	<ul class='nav navbar-nav navbar-right'>
-				<li><a href='login'><span class='glyphicon glyphicon-log-in'></span> Login</a></li>
-			</ul>
-		  <?php }else{ ?>
-		  	<ul class='nav navbar-nav navbar-right'>
-				
-				
-				<li>
-					<a href='#' role='button' 
-					  data-container = 'body' data-toggle = 'popover' data-placement = 'bottom' 
-					  data-content = "
-						<a href='settings' class = 'list-group-item'><span class='glyphicon glyphicon-cog'></span> Settings</a>
-						<a href = 'maintenance' class = 'list-group-item'><span class='glyphicon glyphicon-hdd'></span> Maintenance</a><a href = 'logout' class = 'list-group-item'><span class='glyphicon glyphicon-log-out'></span> Logout</a><a href = '#' class = 'list-group-item shutdown'><span class='glyphicon glyphicon-off'></span> Shutdown</a>
-										  					  
-					  ">
-					Hi <?php echo $employee_name; ?></a></a>
-				</li>				
-				
-			</ul>
-		  <?php }?>
+			
+			<li>
+				<a href='#' role='button'
+				  data-container = 'body' data-toggle = 'popover' data-placement = 'bottom' 
+				  data-content = "
+					<a href='settings' class = 'list-group-item'><span class='glyphicon glyphicon-cog'></span> Settings</a>
+					<a href = 'maintenance' class = 'list-group-item'><span class='glyphicon glyphicon-hdd'></span> Maintenance</a><a href = 'logout' class = 'list-group-item'><span class='glyphicon glyphicon-log-out'></span> Logout</a><a href = '#' class = 'list-group-item shutdown'><span class='glyphicon glyphicon-off'></span> Shutdown</a>
+									  					  
+				  ">
+				Hi <?php echo $employee_name; ?></a></a>
+			</li>				
+			
+		</ul>
+	  <?php }?>
 
-		  
-		  
-		  </div>
+	  
+	  
+	  </div>
 
-	   </nav>	
+   </nav>	
 <div class="container-fluid">
   <div class='row'>
   	<div class='col-md-12'>
