@@ -32,6 +32,7 @@ if(isset($itemID)){
 		$total = $quantity * $costprice;
 		$item_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_items WHERE itemID='$itemID'"));
 		if($item_data["has_serial"]==1){
+			$cart_query = mysql_query("SELECT * FROM tbl_cart_receiving");
 			while($cart_row=mysql_fetch_assoc($cart_query)){
 				$supplierID = $cart_row["supplierID"];
 				$mode = $cart_row["mode"];
