@@ -12,7 +12,7 @@ $type='';
 error_reporting(0);
 $list_modules = array();
 define("APP_VERSION","1.02");
-define("DB_NAME","jbtech_pos");
+define("DB_NAME","emz");
 define("DB_USER","root");
 define("DB_PASSWORD","");
 
@@ -30,7 +30,7 @@ if(!mysql_fetch_array($db_tables_query)){
 
 $app_db = mysql_query("SELECT * FROM app_config");
 if(mysql_num_rows($app_db)==0){
-	mysql_query("INSERT INTO app_config VALUES ('','POS','CASH,CREDIT,BANK','','','','50','','')");
+	mysql_query("INSERT INTO app_config VALUES ('','POS','CASH,CREDIT,BANK','','','','50','','".APP_VERSION."')");
 }
 
 
