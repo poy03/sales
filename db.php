@@ -161,16 +161,17 @@ function create_db(){
 }
 
 function create_tables(){
-  mysql_query("CREATE TABLE app_config (
-  id int(11) NOT NULL AUTO_INCREMENT,
-  app_name varchar(50) NOT NULL,
-  type_payment varchar(100) NOT NULL,
-  address varchar(100) NOT NULL,
-  contact_number varchar(100) NOT NULL,
-  app_company_name varchar(100) NOT NULL,
-  maximum_items_displayed float NOT NULL,
-  logo text NOT NULL,
-  PRIMARY KEY (id)
+  mysql_query("CREATE TABLE `app_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_name` varchar(50) NOT NULL,
+  `type_payment` varchar(100) NOT NULL,
+  `address` varchar(100) NOT NULL,
+  `contact_number` varchar(100) NOT NULL,
+  `app_company_name` varchar(100) NOT NULL,
+  `maximum_items_displayed` float NOT NULL,
+  `logo` text NOT NULL,
+  `version` float NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 ");
 
@@ -467,6 +468,20 @@ mysql_query("CREATE TABLE `tbl_users` (
   `expenses` int(11) NOT NULL,
   PRIMARY KEY (`accountID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+mysql_query("CREATE TABLE `tbl_orders_expenses` (
+  `orderID` int(255) NOT NULL AUTO_INCREMENT,
+  `date_of_expense` int(11) NOT NULL,
+  `time_expended` varchar(20) NOT NULL,
+  `description` text NOT NULL,
+  `expenses` double NOT NULL,
+  `comments` text NOT NULL,
+  `accountID` int(255) NOT NULL,
+  `deleted` int(11) NOT NULL,
+  `deleted_comment` text NOT NULL,
+  `deleted_by` int(11) NOT NULL,
+  PRIMARY KEY (`orderID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;")
 
 }
 
