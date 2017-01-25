@@ -155,7 +155,22 @@ input[type="text"] {
 		$x = $_SESSION["selectitem"];
 		if($x!=NULL){
 		foreach($x as $itemID){
-			mysql_query("UPDATE tbl_items SET deleted = '1' WHERE itemID = '$itemID'");
+			$item_query = mysql_query("SELECT * FROM tbl_items WHERE itemID='$itemID' AND deleted='0'");
+			if(mysql_num_rows($item_query)!=0){
+				mysql_query("UPDATE tbl_items SET deleted = '1' WHERE itemID = '$itemID'");
+				mysql_query("UPDATE tbl_items_detail SET deleted='1' WHERE itemID='$itemID'");
+				$item_detail_query = mysql_query("SELECT * FROM tbl_items_detail WHERE itemID='$itemID'");
+				if(mysql_num_rows($item_detail_query)!=0){
+					while($item_detail_row=mysql_fetch_assoc($item_detail_query)){
+						$description = mysql_real_escape_string(htmlspecialchars(trim($_POST["comment"])));
+						$item_detail_id = $item_detail_row["item_detail_id"];
+						$quantity = $item_detail_row["quantity"];
+						$serial_number = $item_detail_row["serial_number"];
+						mysql_query("INSERT INTO tbl_items_history (item_detail_id,itemID,description,date_time,quantity,accountID,serial_number,type) VALUES ('$item_detail_id','$itemID','".$description."','".strtotime(date("m/d/Y"))."','$quantity','$accountID','$serial_number','Item Delete')");
+						mysql_query("UPDATE tbl_items_detail SET quantity='0' WHERE item_detail_id='$item_detail_id'");
+					}
+				}
+			}
 		}
 		echo "
 				<div class = 'alert alert-success'>	

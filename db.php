@@ -11,7 +11,7 @@ if(isset($_COOKIE["LOGGED"])){
 $type='';
 error_reporting(0);
 $list_modules = array();
-define("APP_VERSION","1.01");
+define("APP_VERSION","1.02");
 define("DB_NAME","jbtech_pos");
 define("DB_USER","root");
 define("DB_PASSWORD","");
@@ -30,7 +30,7 @@ if(!mysql_fetch_array($db_tables_query)){
 
 $app_db = mysql_query("SELECT * FROM app_config");
 if(mysql_num_rows($app_db)==0){
-	mysql_query("INSERT INTO app_config VALUES ('','POS','CASH,CREDIT,BANK','','','','50','')");
+	mysql_query("INSERT INTO app_config VALUES ('','POS','CASH,CREDIT,BANK','','','','50','','')");
 }
 
 
@@ -39,11 +39,15 @@ if(mysql_num_rows($app_db)==0){
 				while($configrow=mysql_fetch_assoc($configquery)){
 					$app_name=$configrow["app_name"];
 					$type_payment=$configrow["type_payment"];
-					$address=$configrow["address"];
+          $address=$configrow["address"];
+					$version=$configrow["version"];
 					$contact_number=$configrow["contact_number"];
 					$app_company_name=$configrow["app_company_name"];
 					$maximum_items_displayed=$configrow["maximum_items_displayed"];
 					$logo=$configrow["logo"];
+          if($version<APP_VERSION){
+            header("location:change-patch");
+          }
 				}
 			}else{
 				$app_name = $type_payment = $address = $contact_number = $app_company_name = $maximum_items_displayed = $logo = "";

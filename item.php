@@ -101,6 +101,36 @@ include 'db.php';
 		  window.location='item?s='+ui.item.data;
 	  }
     });
+
+    $("#item-form").submit(function(e){
+    	e.preventDefault();
+    	// alert($("#item-form").serialize())
+
+    	$.ajax({
+    		type: "POST",
+    		url: "item-form",
+    		data: $("#item-form").serialize(),
+    		cache: false,
+    		dataType: "json",
+    		success: function(data){
+    			if(data.type=="item-delete"){
+    				$("#item-delete").modal("show");
+    			}else{
+	    			window.location = data.type;
+    			}
+    		}
+    	});
+
+    });
+
+    $("#delete").click(function(){
+    	$("#type-button").val("delete");
+    });
+    $("#edit").click(function(){
+    	$("#type-button").val("edit");
+    });
+
+
 	
   });
   
@@ -217,24 +247,6 @@ include 'db.php';
 		header("location:item-edit");
 	}
 
-	if(isset($_POST["sales"])){
-		$x = array();
-		$x = $_POST["select"];
-		foreach($x as $itemID){
-			$cartquery = mysql_query("SELECT * FROM tbl_cart WHERE accountID='$accountID' AND itemID='$itemID'");
-			if(mysql_num_rows($cartquery)==0){
-				mysql_query("INSERT INTO tbl_cart VALUES ('','$itemID','1','0','$accountID','','','')");
-			}else{
-				$searchquery = mysql_query("SELECT * FROM tbl_cart WHERE itemID='$itemID'");
-				while($searchrow=mysql_fetch_assoc($searchquery)){
-					$quantity = $searchrow["quantity"];
-					$quantity++;
-				}
-				$updatequery = mysql_query("UPDATE tbl_cart SET quantity='$quantity' WHERE itemID='$itemID'");
-			}
-		}
-		header("location:sales");
-	}
 	if(isset($_POST["delete"])){
 		$x = array();
 		$x = @$_POST["select"];
@@ -243,10 +255,12 @@ include 'db.php';
 		?>
 		<script type="text/javascript">
 			$(document).ready(function() {
-				 var conf = confirm("Are you sure you want to delete selected items?");
-				 if(conf==true){
-					 window.location="item-delete";
-				 }
+				 // var conf = confirm("Are you sure you want to delete selected items?");
+				 // if(conf==true){
+					//  window.location="item-delete";
+				 // }
+
+				 $("#item-delete").modal("show");
 			});
 		</script>
 		<?php
@@ -254,13 +268,42 @@ include 'db.php';
 		}
 	}
 	?>
-	<form action="item" method='post'>
+
+	<!-- Modal -->
+	<div id="item-delete" class="modal fade" role="dialog">
+	  <div class="modal-dialog">
+
+	    <!-- Modal content-->
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal">&times;</button>
+	        <h4 class="modal-title">Modal Header</h4>
+	      </div>
+	      <div class="modal-body">
+	        <p>
+	        	<form action="item-delete" id="item-delete-form" method="post">
+	        		<label>Reason for Deleting:</label>
+	        		<textarea class="form-control" placeholder="Comments" name="comment" required></textarea>
+	        	</form>
+
+	        </p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="submit" form="item-delete-form" class="btn btn-danger">Confirm</button>
+	      </div>
+	    </div>
+
+	  </div>
+	</div>
+	<form action="item" method='post' id="item-form">
+	<input type="hidden" name="type" id="type-button"></input>
 	<div class='col-md-2'>
 	<label>Controls:</label>
 	<span class='btn btn-primary btn-block' name='add' id='add'><span class='glyphicon glyphicon-briefcase'></span> Add Items</span>
+	<button class='btn btn-primary btn-block' name='edit' id="edit" type='submit'><span class='glyphicon glyphicon-edit'></span> Edit Items</button>
 	<?php if($type=='admin'){ ?>	
-	<button class='btn btn-primary btn-block' name='edit' type='submit'><span class='glyphicon glyphicon-edit'></span> Edit Items</button>
-	<button class='btn btn-danger btn-block' name='delete' type='submit' id='delete'><span class='glyphicon glyphicon-trash'></span> Delete Items</button>
+	<button class='btn btn-danger btn-block' name='delete' id="delete" type='submit'><span class='glyphicon glyphicon-trash'></span> Delete Items</button>
 	<?php } ?>
 	<br>
 	<label>Category:</label>
@@ -414,7 +457,13 @@ include 'db.php';
 			 ";
 	     $i++;
 		 }
-	 }
+	 }else{
+			echo "
+			<tr>
+				<td colspan='20' align='center'><b style='font-size:200%'>No Items to Show.</b></td>
+			</tr>
+			";
+	}
 	 ?>
 	 </tbody>
 	 <tfoot>

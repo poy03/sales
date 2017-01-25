@@ -101,13 +101,21 @@ include 'db.php';
 				$quantity = $history_row["quantity"];
 				$user_accountID = $history_row["accountID"];
 				$user_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_users WHERE accountID='$user_accountID'"));
+				$row_status = "";
 				if(strtolower($type)=="sales"||strtolower($type)=="sales delete"){
 					$referenceID = "<a href='sales-re?id=".$referenceID."'>S".sprintf("%06d",$referenceID)."</a>";
+					$row_status = "success";
 				}elseif(strtolower($type)=="purchase"||strtolower($type)=="stock in"||strtolower($type)=="purchase delete"){
 					$referenceID = "<a href='receiving-re?id=".$referenceID."'>R".sprintf("%06d",$referenceID)."</a>";
+					$row_status = "";
+				}else{
+					$referenceID = "";
+				}
+				if (strpos($type, 'Delete') !== false) {
+					$row_status = "danger	";
 				}
 				echo "
-				<tr>
+				<tr class='$row_status'>
 					<td>".date("m/d/Y",$date_time)."</td>
 					<td>".$type."</td>
 					<td>".$item_data["category"]."</td>

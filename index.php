@@ -9,14 +9,11 @@ $search=@$_GET['search'];
 			$by=@$_GET['by'];
 			$order=@$_GET['order'];
 
-#$connect = mysql_connect("localhost","qfcdavao_admin","_39a11nwpm");
-#mysql_select_db("qfcdavao_dbinventory");
-
-
 
 
 
 include 'db.php';
+// echo APP_VERSION;
 // echo md5("admin\'");
 
 	$timezone  = 0; //(GMT -5:00) EST (U.S. & Canada) 

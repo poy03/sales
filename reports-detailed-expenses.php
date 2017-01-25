@@ -3,11 +3,12 @@ ob_start();
 session_start();
 $accountID=@$_SESSION['accountID'];
 $page=@$_GET['page'];
-$d=@$_GET['d'];
+$t=@$_GET['t'];
+$f=@$_GET['f'];
 $keyword=@$_GET['keyword'];
 $search=@$_GET['search'];
-$f=@$_GET['f'];
-$t=@$_GET['t'];
+$by=@$_GET['by'];
+$order=@$_GET['order'];
 
 
 
@@ -31,7 +32,6 @@ include 'db.php';
   
   <link rel="stylesheet" href="style.css">
   <script src="jquery.min.js"></script>
-  <script src="main.js"></script>
   <script src="js/bootstrap.min.js"></script>
   
   <link rel="stylesheet" href="themes/smoothness/jquery-ui.css">
@@ -66,25 +66,7 @@ include 'db.php';
 		  window.location='item?s='+ui.item.data;
 	  }
     });
-
-    $(".delete").click(function(e){
-    	$("#orderID").val(e.target.id);
-    	$("#expenses-modal").modal("show");
-    });
-	
-	$("#expenses-delete-form").submit(function(e){
-		e.preventDefault();
-		// alert($("#expenses-delete-form").serialize());
-		$.ajax({
-			type: "POST",
-			url: $("#expenses-delete-form").attr("action"),
-			data: $("#expenses-delete-form").serialize(),
-			cache: false,
-			success: function(data){
-				location.reload();
-			}
-		});
-	});
+		
 
   
   });
@@ -188,7 +170,7 @@ include 'db.php';
 					  data-container = 'body' data-toggle = 'popover' data-placement = 'bottom' 
 					  data-content = "
 						<a href='settings' class = 'list-group-item'><span class='glyphicon glyphicon-cog'></span> Settings</a>
-						<a href = 'maintenance' class = 'list-group-item'><span class='glyphicon glyphicon-hdd'></span> Maintenance</a><a href = 'logout' class = 'list-group-item'><span class='glyphicon glyphicon-log-out'></span> Logout</a><a href = '#' class = 'list-group-item shutdown'><span class='glyphicon glyphicon-off'></span> Shutdown</a>
+						<a href = 'maintenance' class = 'list-group-item'><span class='glyphicon glyphicon-hdd'></span> Maintenance</a><a href = 'logout' class = 'list-group-item'><span class='glyphicon glyphicon-log-out'></span> Logout</a>
 										  					  
 					  ">
 					Hi <?php echo $employee_name; ?></a></a>
@@ -201,189 +183,87 @@ include 'db.php';
 		  
 		  </div>
 
-	   </nav>
-
-
-	   <!-- Modal -->
-	   <div id="expenses-modal" class="modal fade" role="dialog">
-	     <div class="modal-dialog">
-
-	       <!-- Modal content-->
-	       <div class="modal-content">
-	         <div class="modal-header">
-	           <button type="button" class="close" data-dismiss="modal">&times;</button>
-	           <h4 class="modal-title">Expenses Delete</h4>
-	         </div>
-	         <div class="modal-body">
-	           <p>
-	           	<form action="expenses-delete" id="expenses-delete-form" method="post">
-	           		<label>Reason for Deleting:</label>
-	           		<input type="hidden" name="orderID" id="orderID">
-	           		<textarea name="deleted_comment" class="form-control" required></textarea>
-	           	</form>
-	           </p>
-	         </div>
-	         <div class="modal-footer">
-	           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	           <button type="submit" form="expenses-delete-form" class="btn btn-primary">Confirm</button>
-	         </div>
-	       </div>
-
-	     </div>
-	   </div>
-
-
+	   </nav>	
 <div class="container-fluid">
   <div class='row'>
-  	<div class='col-md-12'>
+  	<div class='col-md-12 prints'>
 	
 	
 	<?php
 	if($logged==1||$logged==2){
 	if($reports=='1'){
-		if(isset($_GET["all"])){
-
-		}else{
-			echo "<center><h3>Expenses in ".date("F d, Y - ",strtotime($f)).date("F d, Y",strtotime($t))."</h3></center>";
-		}
+		echo "<center><h3>Summary of Expenses in<br> ".date("F d, Y",strtotime($f))." - ".date("F d, Y",strtotime($t))."</h3></center>";
 	?>
 	<div class='table-responsive'>
-	<button class="btn btn-primary prints" onclick="window.print()"><span class="glyphicon glyphicon-print"></span> Print</button>
 	<table class='table table-responsive'>
 	<thead>
 		<tr>
-			<th style='text-align:center;'>Expense Description</th>
-			<th style='text-align:left;'>Date</th>
-			<th style='text-align:left;'>Time</th>
-			<th style='text-align:right'>Expense Amount</th>
-			<th style='text-align:center'>Comments</th>
+			<th>Description</th>
+			<th style='text-align:center'>Expenses</th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php
-		if(!isset($page)){$page=1;}elseif($page<=0){$page=1;}
-		$maxitem = $maximum_items_displayed; // maximum items
-		$limit = ($page*$maxitem)-$maxitem;
-
-
-		$query = "SELECT * FROM tbl_orders_expenses WHERE deleted='0'";
-		if(isset($_GET["all"])){
-		}else{
-			$query .=" AND date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."'";
-
+		$list_of_description = array();
+		$expenses_unique = mysql_query("SELECT DISTINCT comments FROM tbl_orders_expenses WHERE date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."' AND deleted='0' ORDER BY comments");
+		if(mysql_num_rows($expenses_unique)!=0){
+			while($expenses_unique_row = mysql_fetch_assoc($expenses_unique)){
+				$list_of_description[] = $expenses_unique_row["comments"];
+			}
 		}
-		$numitemquery = mysql_query($query);
-		$numitem = mysql_num_rows($numitemquery);
-		$query.=" LIMIT $limit, $maxitem";
-		// echo $query;
 
- 		if(($numitem%$maxitem)==0){
-			$lastpage=($numitem/$maxitem);
-		}else{
-			$lastpage=($numitem/$maxitem)-(($numitem%$maxitem)/$maxitem)+1;
-		}
-		$maxpage = 3;
-
-
-		$expenses_query = mysql_query($query);
-		$total_expenses = 0;
-		if(mysql_num_rows($expenses_query)!=0){
+		foreach($list_of_description as $comments){
+			$expenses_query = mysql_query("SELECT SUM(expenses) as total_expenses_of_description FROM tbl_orders_expenses WHERE date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."' AND deleted='0' AND comments='$comments'");
 			while($expenses_row=mysql_fetch_assoc($expenses_query)){
-				$time_expended=$expenses_row["time_expended"];
-				$orderID=$expenses_row["orderID"];
-				$date_of_expense=$expenses_row["date_of_expense"];
-				$description=htmlspecialchars_decode($expenses_row["description"]);
-				$expenses=$expenses_row["expenses"];
-				$comments=$expenses_row["comments"];
-				$total_expenses+=$expenses;
 				echo "
 				<tr>
-					<td>".$description."</td>
-					<td>".date("m/d/Y",$date_of_expense)."</td>
-					<td>".date("h:i:s A",$time_expended)."</td>
-					<td style='text-align:right'>₱".number_format($expenses,2)."</td>
-					<td style='text-align:center'>$comments</td>
-					<td style='text-align:center'><a href='#' class='delete' id='$orderID'>&times</td>
+					<td>".$comments."</td>
+					<td style='text-align:right'>₱".number_format($expenses_row["total_expenses_of_description"],2)."</td>
 				</tr>
 				";
 			}
 		}
+
+/*		var_dump($description);
+		exit;
+		$expenses_query = mysql_query("SELECT * FROM tbl_expenses WHERE date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."' AND deleted='0'");
+		$total_expenses = 0;
+		if(mysql_num_rows($expenses_query)!=0){
+			while($expenses_row=mysql_fetch_assoc($expenses_query)){
+				$orderID=$expenses_row["orderID"];
+				$date_of_expense=$expenses_row["date_of_expense"];
+				$expenses=$expenses_row["expenses"];
+				$description=$expenses_row["description"];
+				$total_expenses+=$expenses;
+				$order_data = mysql_fetch_assoc(mysql_query("SELECT * FROM tbl_orders_expenses WHERE orderID='$orderID'"));
+				$comments = $order_data["comments"];
+				echo "
+				<tr>
+					<td><a href='expenses-view?id=$orderID' target='_blank'>E".sprintf("%06d",$orderID)."</a></td>
+					<td>".date("m/d/Y",$date_of_expense)."</td>
+					<td>".$description."</td>
+					<td style='text-align:right'>₱".number_format($expenses,2)."</td>
+					<td style='text-align:center'>$comments</td>
+				</tr>
+				";
+			}
+		}*/
 		?>
 	</tbody>
 	<tfoot>
 	<?php
-	if(mysql_num_rows($expenses_query)!=0){ 
+	if(mysql_num_rows($expenses_unique)!=0){
+	$total_expenses = mysql_fetch_assoc(mysql_query("SELECT SUM(expenses) as total_expenses FROM tbl_orders_expenses WHERE date_of_expense BETWEEN '".strtotime($f)."' AND '".strtotime($t)."' AND deleted='0'"));
 		echo "
 		<tr>
-			<th style='text-align:right' colspan='4'>₱".number_format($total_expenses,2)."</th>
-			<th style='text-align:right'></th>
+			<th style='text-align:right'>Total Expenses:</th>
+			<th style='text-align:right'>₱".number_format($total_expenses["total_expenses"],2)."</th>
 		<tr>
 		";
 	}
 	?>
 	</tfoot>
 	</table>
-	<?php 
-		echo "
-	<div class='text-center'>
-		<ul class='pagination prints'>
-		
-		";
-		// $url="?cat=$cat&sort=$sort&";
-		if(isset($_GET["all"])){
-			$all = $_GET["all"];
-			$url="?f=$f&t=$t&all=$all&submit=&";
-		}else{
-			$url="?f=$f&t=$t&submit=&";
-		}
-		$cnt=0;
-		if($page>1){
-			$back=$page-1;
-			echo "<li><a href = '".$url."page=1'>&laquo;&laquo;</a></li>";	
-			echo "<li><a href = '".$url."page=$back'>&laquo;</a></li>";	
-			for($i=($page-$maxpage);$i<$page;$i++){
-				if($i>0){
-					echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
-				}
-				$cnt++;
-				if($cnt==$maxpage){
-					break;
-				}
-			}
-		}
-		
-		$cnt=0;
-		for($i=$page;$i<=$lastpage;$i++){
-			$cnt++;
-			if($i==$page){
-				echo "<li class='active'><a href = '#'>$i</a></li>";	
-			}else{
-				echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
-			}
-			if($cnt==$maxpage){
-				break;
-			}
-		}
-		
-		$cnt=0;
-		for($i=($page+$maxpage);$i<=$lastpage;$i++){
-			$cnt++;
-			echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
-			if($cnt==$maxpage){
-				break;
-			}
-		}
-		if($page!=$lastpage&&$numitem>0){
-			$next=$page+1;
-			echo "<li><a href = '".$url."page=$next'>&raquo;</a></li>";
-			echo "<li><a href = '".$url."page=$lastpage'>&raquo;&raquo;</a></li>";
-		}
-		echo "</ul><span class='page' >Page $page</span>
-		</div>
-		";
-		
-
-	 ?>
 	</div>
 	
 	<?php

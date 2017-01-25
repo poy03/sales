@@ -2,26 +2,14 @@
 ob_start();
 session_start();
 $accountID=@$_SESSION['accountID'];
-$cartID=@$_GET['id'];
-$cat=@$_GET['cat'];
-$keyword=@$_GET['keyword'];
-$search=@$_GET['search'];
-			$by=@$_GET['by'];
-			$order=@$_GET['order'];
-
-
 
 include 'db.php';
 
+if($_POST){
+	$orderID = $_POST["orderID"];
+	$deleted_comment = mysql_real_escape_string(htmlspecialchars(trim($_POST["deleted_comment"])));
+	$deleted_comment .=" (".date("m/d/Y").")";
+	mysql_query("UPDATE tbl_orders_expenses SET deleted='1', deleted_by='$accountID', deleted_comment='$deleted_comment' WHERE orderID='$orderID'");
 
-?>
-<?php
-if(isset($cartID)){
-	mysql_query("DELETE FROM tbl_cart_expenses WHERE cartID='$cartID'");
-	header("location:expenses");
-}else{
-	header("location:expenses");
 }
-
-	//mysql_query("DELETE FROM tbl_cart_expenses WHERE accountID='$accountID'");
 ?>

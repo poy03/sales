@@ -579,6 +579,7 @@ include 'db.php';
 			echo "<a href = '?tab=11' class = 'list-group-item"; if(isset($tab)&&$tab=='11'){echo " active"; } echo "'>Per Category Sales</a>";
 			echo "<a href = '?tab=3' class = 'list-group-item"; if(isset($tab)&&$tab=='3'){echo " active"; } echo "'>Receiving Reports</a>";
 			echo "<a href = '?tab=4' class = 'list-group-item"; if(isset($tab)&&$tab=='4'){echo " active"; } echo "'>Expenses</a>";
+			echo "<a href = '?tab=13' class = 'list-group-item"; if(isset($tab)&&$tab=='13'){echo " active"; } echo "'>Deleted Expenses</a>";
 			// echo "<a href = '?tab=5' class = 'list-group-item"; if(isset($tab)&&$tab=='5'){echo " active"; } echo "'>Customer&#39;s Purchases</a>";
 			echo "<a href = '?tab=6' class = 'list-group-item"; if(isset($tab)&&$tab=='6'){echo " active"; } echo "'>Payments</a>";
 			// echo "<a href = '?tab=7' class = 'list-group-item"; if(isset($tab)&&$tab=='7'){echo " active"; } echo "'>Credits</a>";
@@ -1057,6 +1058,7 @@ include 'db.php';
 							<option value="purchase">Purchase</option>
 							<option value="sales delete">Deleted Sales</option>
 							<option value="purchase delete">Deleted Purchases</option>
+							<option value="item delete">Deleted Items</option>
 						</select>
 					</div>
 					<input type="hidden" id="serial_number" name="serial_number" placeholder="Serial Number">
@@ -1102,6 +1104,118 @@ include 'db.php';
 				<?php
 				
 
+		}elseif ($tab==13) {
+			 // deleted sales
+						if(!isset($page)){$page=1;}elseif($page<=0){$page=1;}
+						$maxitem = $maximum_items_displayed; // maximum items
+						$limit = ($page*$maxitem)-$maxitem;
+						echo "
+						<div class='col-md-10'>";
+						echo '<button class="btn btn-primary prints" onclick="window.print()"><span class="glyphicon glyphicon-print"></span> Print</button>';
+						echo "<div class='table-responsive'>
+							<table class='table-hover table'>
+								<thead>
+									<tr>
+										<th>Date of Expense</th>
+										<th>Expenses Description</th>
+										<th>Expenses Amount</th>
+										<th>Employee</th>
+										<th>Reason for deleting</th>
+									</tr>
+								</thead>
+								<tbody>";
+								$query = "SELECT * FROM tbl_orders_expenses WHERE deleted!='0' ORDER BY orderID DESC";
+								$numitemquery = mysql_query($query);
+								$numitem = mysql_num_rows($numitemquery);
+								$query.=" LIMIT $limit, $maxitem";
+								// echo $query;
+
+						 		if(($numitem%$maxitem)==0){
+									$lastpage=($numitem/$maxitem);
+								}else{
+									$lastpage=($numitem/$maxitem)-(($numitem%$maxitem)/$maxitem)+1;
+								}
+								$maxpage = 3;
+
+								$item_query = mysql_query($query);
+								if(mysql_num_rows($item_query)!=0){
+									while($item_row=mysql_fetch_assoc($item_query)){
+										$orderID=$item_row["orderID"];
+										$description=$item_row["description"];
+										$expenses=number_format($item_row["expenses"],2);
+										$dbaccountID=$item_row["accountID"];
+										$date_of_expense=date("m/d/Y",$item_row["date_of_expense"]);
+										$comments=$item_row["deleted_comment"];
+										$account_query = mysql_query("SELECT * FROM tbl_users WHERE accountID='$dbaccountID'");
+										while($account_row=mysql_fetch_assoc($account_query)){
+											$dbemployee_name = $account_row["employee_name"];
+										}
+										echo "
+										<tr>
+											<td>$date_of_expense</td>
+											<td>$description</td>
+											<td style='text-align:right'>$expenses</td>
+											<td>$dbemployee_name</td>
+											<td>$comments</td>
+										</tr>
+										";
+									}
+								}
+								echo "</tbody>
+							</table>";
+							echo "<div class='text-center'><ul class='pagination prints'>
+							
+							";
+							$url="?tab=$tab&";
+							$cnt=0;
+							if($page>1){
+								$back=$page-1;
+								echo "<li><a href = '".$url."page=1'>&laquo;&laquo;</a></li>";	
+								echo "<li><a href = '".$url."page=$back'>&laquo;</a></li>";	
+								for($i=($page-$maxpage);$i<$page;$i++){
+									if($i>0){
+										echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+									}
+									$cnt++;
+									if($cnt==$maxpage){
+										break;
+									}
+								}
+							}
+							
+							$cnt=0;
+							for($i=$page;$i<=$lastpage;$i++){
+								$cnt++;
+								if($i==$page){
+									echo "<li class='active'><a href = '#'>$i</a></li>";	
+								}else{
+									echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+								}
+								if($cnt==$maxpage){
+									break;
+								}
+							}
+							
+							$cnt=0;
+							for($i=($page+$maxpage);$i<=$lastpage;$i++){
+								$cnt++;
+								echo "<li><a href = '".$url."page=$i'>$i</a></li>";	
+								if($cnt==$maxpage){
+									break;
+								}
+							}
+							if($page!=$lastpage&&$numitem>0){
+								$next=$page+1;
+								echo "<li><a href = '".$url."page=$next'>&raquo;</a></li>";
+								echo "<li><a href = '".$url."page=$lastpage'>&raquo;&raquo;</a></li>";
+							}
+							echo "</ul><span class='page' >Page $page</span></div>";
+							
+							echo "
+						</div>
+						</div>
+						";
+					
 		}
 		?>
 
