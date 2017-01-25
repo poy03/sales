@@ -37,10 +37,11 @@ if(isset($itemID)){
 				$supplierID = $cart_row["supplierID"];
 				$mode = $cart_row["mode"];
 				$comments = $cart_row["comments"];
+				$purchase_order = $cart_row["purchase_order"];
 			}
 
 				
-			mysql_query("INSERT INTO tbl_cart_receiving (itemID,quantity,accountID,supplierID,mode,costprice,subtotal,comments) VALUES('$itemID','1','$accountID','$supplierID','receive','$costprice','$costprice','$comments')");
+			mysql_query("INSERT INTO tbl_cart_receiving (itemID,quantity,accountID,supplierID,mode,costprice,subtotal,comments,purchase_order) VALUES('$itemID','1','$accountID','$supplierID','receive','$costprice','$costprice','$comments','$purchase_order')");
 		}else{
 			mysql_query("UPDATE tbl_cart_receiving SET quantity='$quantity', subtotal = '$total' WHERE itemID='$itemID' AND accountID='$accountID'");
 		}
