@@ -481,7 +481,7 @@ mysql_query("CREATE TABLE `tbl_orders_expenses` (
   `deleted_comment` text NOT NULL,
   `deleted_by` int(11) NOT NULL,
   PRIMARY KEY (`orderID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;")
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;");
 
 }
 
